@@ -12,6 +12,11 @@ from .serializers import (
 from users.permissions import IsAdmin, IsOfficial
 
 
+def scope_to_official(qs, user):
+    """Officials see complaints assigned to them or under their department."""
+    return qs.filter(models.Q(assigned_to=user) | models.Q(category=user.department))
+
+
 class CategoryListCreateView(generics.ListCreateAPIView):
     serializer_class = CategorySerializer
 
@@ -68,6 +73,8 @@ class ComplaintListCreateView(generics.ListCreateAPIView):
         qs = Complaint.objects.select_related('citizen', 'category', 'ward', 'assigned_to')
         if user.role == 'citizen':
             qs = qs.filter(citizen=user)
+        elif user.role == 'official':
+            qs = scope_to_official(qs, user)
         return qs
 
     def create(self, request, *args, **kwargs):
@@ -89,6 +96,8 @@ class ComplaintDetailView(generics.RetrieveAPIView):
         qs = qs.prefetch_related('status_history', 'feedback')
         if user.role == 'citizen':
             qs = qs.filter(citizen=user)
+        elif user.role == 'official':
+            qs = scope_to_official(qs, user)
         return qs
 
 
@@ -100,9 +109,7 @@ class ComplaintUpdateView(generics.UpdateAPIView):
         user = self.request.user
         if user.role == 'admin':
             return Complaint.objects.all()
-        return Complaint.objects.filter(
-            models.Q(assigned_to=user) | models.Q(assigned_to__isnull=True)
-        )
+        return scope_to_official(Complaint.objects.all(), user)
 
 
 class FeedbackCreateView(generics.CreateAPIView):

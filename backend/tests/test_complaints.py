@@ -15,6 +15,7 @@ class ComplaintTest(TestCase):
             email='official@example.com', full_name='Official', password='official123', role='official'
         )
         self.category = Category.objects.create(name='Roads', description='Road issues')
+        self.other_category = Category.objects.create(name='Water', description='Water issues')
         self.ward = Ward.objects.create(name='Westlands', sub_county='Westlands')
 
     def test_citizen_create_complaint(self):
@@ -44,16 +45,40 @@ class ComplaintTest(TestCase):
         response = self.client.get('/api/complaints/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_official_view_all_complaints(self):
-        self.client.force_authenticate(user=self.official)
+    def test_official_sees_own_department_complaints(self):
+        self.official.department = self.category
+        self.official.save()
         Complaint.objects.create(
             citizen=self.citizen, category=self.category, ward=self.ward,
-            title='Test', description='Test', location='Test', status='submitted'
+            title='In department', description='Test', location='Test', status='submitted'
         )
+        Complaint.objects.create(
+            citizen=self.citizen, category=self.other_category, ward=self.ward,
+            title='Other department', description='Test', location='Test', status='submitted'
+        )
+        self.client.force_authenticate(user=self.official)
         response = self.client.get('/api/complaints/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        titles = {c['title'] for c in response.data['results']}
+        self.assertIn('In department', titles)
+        self.assertNotIn('Other department', titles)
+
+    def test_official_sees_complaint_assigned_to_them_outside_department(self):
+        self.official.department = self.category
+        self.official.save()
+        assigned = Complaint.objects.create(
+            citizen=self.citizen, category=self.other_category, ward=self.ward,
+            assigned_to=self.official,
+            title='Assigned but other department', description='Test', location='Test', status='submitted'
+        )
+        self.client.force_authenticate(user=self.official)
+        response = self.client.get('/api/complaints/')
+        titles = {c['title'] for c in response.data['results']}
+        self.assertIn('Assigned but other department', titles)
 
     def test_official_update_status(self):
+        self.official.department = self.category
+        self.official.save()
         self.client.force_authenticate(user=self.official)
         complaint = Complaint.objects.create(
             citizen=self.citizen, category=self.category, ward=self.ward,
@@ -66,6 +91,19 @@ class ComplaintTest(TestCase):
         complaint.refresh_from_db()
         self.assertEqual(complaint.status, 'under_review')
 
+    def test_official_cannot_update_other_department_unassigned_complaint(self):
+        self.official.department = self.category
+        self.official.save()
+        self.client.force_authenticate(user=self.official)
+        complaint = Complaint.objects.create(
+            citizen=self.citizen, category=self.other_category, ward=self.ward,
+            title='Test', description='Test', location='Test', status='submitted'
+        )
+        response = self.client.patch(f'/api/complaints/{complaint.id}/update/', {
+            'status': 'under_review'
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_citizen_cannot_update_status(self):
         self.client.force_authenticate(user=self.citizen)
         complaint = Complaint.objects.create(
@@ -76,6 +114,17 @@ class ComplaintTest(TestCase):
             'status': 'resolved'
         }, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_official_cannot_view_other_department_complaint_detail(self):
+        self.official.department = self.category
+        self.official.save()
+        complaint = Complaint.objects.create(
+            citizen=self.citizen, category=self.other_category, ward=self.ward,
+            title='Test', description='Test', location='Test', status='submitted'
+        )
+        self.client.force_authenticate(user=self.official)
+        response = self.client.get(f'/api/complaints/{complaint.id}/')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_complaint_detail(self):
         self.client.force_authenticate(user=self.citizen)
