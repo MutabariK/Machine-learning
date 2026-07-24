@@ -27,10 +27,16 @@ frontend/
 
 ## Backend Setup
 
+Requires **Python 3.11** (Django 4.2 and Pillow 10.4 don't support 3.13+, so a
+venv created with a newer default `python` will fail to install). On Windows,
+use the `py` launcher to select it explicitly; on macOS/Linux, use
+`python3.11` if that's not your default.
+
 ```bash
 cd backend
-python -m venv venv
+py -3.11 -m venv venv        # Windows; use `python3.11 -m venv venv` on macOS/Linux
 venv\Scripts\activate        # Windows
+cp .env.example .env         # fill in values as needed
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py runserver
