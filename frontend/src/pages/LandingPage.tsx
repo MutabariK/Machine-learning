@@ -1,0 +1,498 @@
+import React from 'react';
+import { useNavigate, Navigate } from 'react-router-dom';
+import {
+  Box, Container, Typography, Button, Grid, Paper, Avatar, Chip, alpha, Fade,
+} from '@mui/material';
+import {
+  Description, Assessment, CheckCircle, Star, WaterDrop, AddRoad,
+  DeleteSweep, Security, MedicalServices, Forest, Apartment, School,
+  Psychology, GpsFixed, BarChart, FormatQuote, ArrowForward,
+} from '@mui/icons-material';
+import { useAuth } from '../contexts/AuthContext';
+import NairobiCoatOfArms from '../components/NairobiCoatOfArms';
+import { nairobiColors } from '../theme/nairobiTheme';
+
+const STATS = [
+  { value: '15,420+', label: 'Issues Resolved', color: nairobiColors.green.main },
+  { value: '48h', label: 'Avg Response Time', color: nairobiColors.gold.dark },
+  { value: '94%', label: 'Resolution Rate', color: '#2E7D32' },
+  { value: '85', label: 'Wards Covered', color: nairobiColors.maroon.main },
+];
+
+const STEPS = [
+  { icon: <Description />, title: '1. Submit', desc: 'Capture details and photos of the issue through our simple e-form.' },
+  { icon: <Assessment />, title: '2. Track', desc: 'Get a unique tracking ID and watch the status change in real-time.' },
+  { icon: <CheckCircle />, title: '3. Resolve', desc: 'County officials address the issue and upload proof of work.' },
+  { icon: <Star />, title: '4. Rate', desc: 'Share your feedback to help us maintain service quality standards.' },
+];
+
+const CATEGORIES = [
+  { icon: <WaterDrop />, label: 'Water & Sewerage' },
+  { icon: <AddRoad />, label: 'Roads' },
+  { icon: <DeleteSweep />, label: 'Waste' },
+  { icon: <Security />, label: 'Security' },
+  { icon: <MedicalServices />, label: 'Health' },
+  { icon: <Forest />, label: 'Environment' },
+  { icon: <Apartment />, label: 'Housing' },
+  { icon: <School />, label: 'Education' },
+];
+
+const FEATURES = [
+  {
+    icon: <Psychology />,
+    title: 'AI-Powered Categories',
+    desc: 'Smart routing ensures your report reaches the specific department responsible for immediate action.',
+  },
+  {
+    icon: <GpsFixed />,
+    title: 'Real-Time Tracking',
+    desc: 'Watch every stage of the resolution process from assessment to final verification.',
+  },
+  {
+    icon: <BarChart />,
+    title: 'Ward-Level Analytics',
+    desc: 'Transparent dashboards showing performance metrics across all 85 wards of Nairobi.',
+  },
+];
+
+const TESTIMONIALS = [
+  {
+    quote: '"Reporting the burst pipe in Upper Hill was seamless. The water was restored within 24 hours. This portal brings government closer to us."',
+    name: 'Jane Muthoni',
+    role: 'Citizen, Kilimani Ward',
+    initials: 'JM',
+    color: nairobiColors.green.main,
+  },
+  {
+    quote: '"The data from this platform allows us to allocate resources more efficiently. We now solve problems based on live community feedback."',
+    name: 'Hon. Otieno K.',
+    role: 'County Official',
+    initials: 'OK',
+    color: nairobiColors.gold.dark,
+  },
+];
+
+const SectionHeading: React.FC<{ title: string; subtitle?: string }> = ({ title, subtitle }) => (
+  <Box sx={{ mb: 5, textAlign: { xs: 'left', md: 'center' } }}>
+    <Typography variant="h4" fontWeight={800} sx={{ color: nairobiColors.green.dark, letterSpacing: '-0.01em' }}>
+      {title}
+    </Typography>
+    {subtitle && (
+      <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+        {subtitle}
+      </Typography>
+    )}
+    <Box sx={{ width: 64, height: 4, bgcolor: nairobiColors.gold.main, borderRadius: 2, mt: 2, mx: { xs: 0, md: 'auto' } }} />
+  </Box>
+);
+
+const LandingPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { user, loading } = useAuth();
+
+  if (!loading && user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return (
+    <Box sx={{ overflowX: 'hidden' }}>
+      {/* Header */}
+      <Box
+        component="header"
+        sx={{
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          px: { xs: 2, md: 4 }, py: 1.5,
+          bgcolor: alpha('#fff', 0.92),
+          backdropFilter: 'blur(20px)',
+          borderBottom: `1px solid ${alpha(nairobiColors.gold.main, 0.2)}`,
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box sx={{
+            px: 1.2, py: 0.6, borderRadius: 2, bgcolor: '#fff',
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            border: `1.5px solid ${alpha(nairobiColors.gold.main, 0.5)}`,
+          }}>
+            <NairobiCoatOfArms size={22} />
+          </Box>
+          <Typography variant="h6" fontWeight={800} sx={{ color: nairobiColors.green.dark }}>
+            Nairobi County
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 3 } }}>
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 3 }}>
+            <Typography component="a" href="#how-it-works" variant="body2"
+              sx={{ color: 'text.secondary', fontWeight: 600, textDecoration: 'none', '&:hover': { color: nairobiColors.green.main } }}>
+              How It Works
+            </Typography>
+            <Typography component="a" href="#categories" variant="body2"
+              sx={{ color: 'text.secondary', fontWeight: 600, textDecoration: 'none', '&:hover': { color: nairobiColors.green.main } }}>
+              Categories
+            </Typography>
+          </Box>
+          <Button
+            variant="outlined"
+            onClick={() => navigate('/login')}
+            sx={{
+              borderRadius: 2, fontWeight: 700,
+              borderColor: nairobiColors.green.main, color: nairobiColors.green.main,
+              '&:hover': { borderColor: nairobiColors.green.dark, bgcolor: alpha(nairobiColors.green.main, 0.05) },
+            }}
+          >
+            Sign In
+          </Button>
+        </Box>
+      </Box>
+
+      {/* Hero */}
+      <Box sx={{
+        position: 'relative',
+        minHeight: { xs: '90vh', md: '85vh' },
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        overflow: 'hidden', pt: 10,
+      }}>
+        <Box
+          component="img"
+          src="/nairobi-skyline-sunset.png"
+          alt="Nairobi skyline at sunset"
+          sx={{
+            position: 'absolute', inset: 0, width: '100%', height: '100%',
+            objectFit: 'cover', objectPosition: 'center 70%',
+          }}
+        />
+        <Box sx={{
+          position: 'absolute', inset: 0,
+          background: `linear-gradient(160deg, ${alpha(nairobiColors.green.dark, 0.85)} 0%, ${alpha(nairobiColors.green.main, 0.55)} 45%, ${alpha(nairobiColors.green.dark, 0.9)} 100%)`,
+        }} />
+
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
+          <Fade in timeout={700}>
+            <Box>
+              <Chip
+                label="OFFICIAL CITIZEN PORTAL"
+                sx={{
+                  mb: 3, px: 1, py: 2.2,
+                  bgcolor: alpha('#fff', 0.15), color: '#fff', fontWeight: 700,
+                  letterSpacing: 1.5, fontSize: '0.7rem',
+                  border: `1px solid ${alpha('#fff', 0.3)}`,
+                  backdropFilter: 'blur(10px)',
+                }}
+              />
+              <Typography
+                variant="h2" fontWeight={800}
+                sx={{
+                  color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em',
+                  fontSize: { xs: '2.1rem', sm: '2.8rem', md: '3.4rem' },
+                  textShadow: '0 4px 20px rgba(0,0,0,0.25)',
+                }}
+              >
+                Transparent, Fast Civic Service For Every Nairobian
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{ color: alpha('#fff', 0.9), mt: 3, mb: 5, maxWidth: 640, mx: 'auto', fontSize: '1.1rem', lineHeight: 1.6 }}
+              >
+                Report issues, track progress, and build a better city together. Your voice drives our capital's transformation.
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexDirection: { xs: 'column', sm: 'row' }, alignItems: 'center' }}>
+                <Button
+                  variant="contained" size="large" endIcon={<ArrowForward />}
+                  onClick={() => navigate('/register')}
+                  sx={{
+                    px: 4, py: 1.6, borderRadius: 2.5, fontWeight: 700, fontSize: '1rem',
+                    background: `linear-gradient(135deg, ${nairobiColors.green.main} 0%, ${nairobiColors.green.dark} 100%)`,
+                    boxShadow: `0 6px 24px ${alpha('#000', 0.25)}`,
+                    '&:hover': { transform: 'translateY(-2px)', boxShadow: `0 8px 28px ${alpha('#000', 0.3)}` },
+                  }}
+                >
+                  Report an Issue
+                </Button>
+                <Button
+                  variant="outlined" size="large"
+                  onClick={() => navigate('/login')}
+                  sx={{
+                    px: 4, py: 1.6, borderRadius: 2.5, fontWeight: 700, fontSize: '1rem',
+                    color: '#fff', borderWidth: 1.5, borderColor: alpha('#fff', 0.7),
+                    '&:hover': { borderWidth: 1.5, borderColor: '#fff', bgcolor: alpha('#fff', 0.1) },
+                  }}
+                >
+                  Sign In
+                </Button>
+              </Box>
+            </Box>
+          </Fade>
+        </Container>
+      </Box>
+
+      {/* Live Impact Stats */}
+      <Box sx={{ position: 'relative', py: { xs: 5, md: 7 }, overflow: 'hidden', mt: -1 }}>
+        <Box
+          component="img"
+          src="/nairobi-skyline-night.png"
+          alt=""
+          sx={{
+            position: 'absolute', inset: 0, width: '100%', height: '100%',
+            objectFit: 'cover', filter: 'blur(3px)', transform: 'scale(1.05)',
+          }}
+        />
+        <Box sx={{ position: 'absolute', inset: 0, bgcolor: alpha('#0F2A1A', 0.78) }} />
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+          <Grid container spacing={3}>
+            {STATS.map((stat) => (
+              <Grid item xs={6} md={3} key={stat.label}>
+                <Fade in timeout={600}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 3, borderRadius: 3, borderTop: `4px solid ${stat.color}`,
+                      bgcolor: alpha('#fff', 0.94), backdropFilter: 'blur(20px)',
+                      transition: 'transform 0.3s ease',
+                      '&:hover': { transform: 'translateY(-4px)' },
+                    }}
+                  >
+                    <Typography variant="h4" fontWeight={800} sx={{ color: stat.color }}>
+                      {stat.value}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600, mt: 0.5 }}>
+                      {stat.label}
+                    </Typography>
+                  </Paper>
+                </Fade>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* How It Works */}
+      <Box id="how-it-works" sx={{ py: { xs: 7, md: 10 }, bgcolor: '#F5F7F4' }}>
+        <Container maxWidth="lg">
+          <SectionHeading title="How It Works" subtitle="From report to resolution in four simple steps" />
+          <Grid container spacing={3}>
+            {STEPS.map((step) => (
+              <Grid item xs={12} sm={6} md={3} key={step.title}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 3.5, height: '100%', borderRadius: 3,
+                    border: `1px solid ${alpha(nairobiColors.green.main, 0.1)}`,
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: `0 12px 28px ${alpha(nairobiColors.green.main, 0.12)}`,
+                      borderColor: alpha(nairobiColors.green.main, 0.2),
+                    },
+                  }}
+                >
+                  <Box sx={{
+                    width: 52, height: 52, borderRadius: '50%',
+                    bgcolor: alpha(nairobiColors.green.main, 0.1),
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2,
+                  }}>
+                    {React.cloneElement(step.icon, { sx: { color: nairobiColors.green.main, fontSize: 26 } })}
+                  </Box>
+                  <Typography variant="subtitle1" fontWeight={700} sx={{ color: nairobiColors.green.dark, mb: 1 }}>
+                    {step.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {step.desc}
+                  </Typography>
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Categories */}
+      <Box id="categories" sx={{ position: 'relative', py: { xs: 7, md: 10 }, overflow: 'hidden' }}>
+        <Box
+          component="img"
+          src="/nairobi-street-dusk.png"
+          alt=""
+          sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+        <Box sx={{ position: 'absolute', inset: 0, bgcolor: alpha('#fff', 0.92) }} />
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+          <SectionHeading title="Report by Category" subtitle="Select a sector to start your report" />
+          <Grid container spacing={2}>
+            {CATEGORIES.map((cat) => (
+              <Grid item xs={6} sm={4} md={3} key={cat.label}>
+                <Paper
+                  elevation={0}
+                  onClick={() => navigate('/login')}
+                  sx={{
+                    p: 3, borderRadius: 3, textAlign: 'center', cursor: 'pointer',
+                    border: `1px solid ${alpha(nairobiColors.green.main, 0.1)}`,
+                    transition: 'all 0.25s ease',
+                    '&:hover': {
+                      bgcolor: nairobiColors.green.main,
+                      borderColor: nairobiColors.green.main,
+                      transform: 'translateY(-3px)',
+                      boxShadow: `0 10px 24px ${alpha(nairobiColors.green.main, 0.25)}`,
+                      '& .cat-icon': { color: '#fff' },
+                      '& .cat-label': { color: '#fff' },
+                    },
+                  }}
+                >
+                  {React.cloneElement(cat.icon, {
+                    className: 'cat-icon',
+                    sx: { fontSize: 34, color: nairobiColors.green.main, mb: 1, transition: 'color 0.25s' },
+                  })}
+                  <Typography
+                    className="cat-label" variant="caption"
+                    sx={{
+                      display: 'block', fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase',
+                      fontSize: '0.7rem', color: 'text.primary', transition: 'color 0.25s',
+                    }}
+                  >
+                    {cat.label}
+                  </Typography>
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Features */}
+      <Box sx={{ py: { xs: 7, md: 10 }, bgcolor: '#F5F7F4' }}>
+        <Container maxWidth="lg">
+          <Grid container spacing={4}>
+            {FEATURES.map((f) => (
+              <Grid item xs={12} md={4} key={f.title}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                  {React.cloneElement(f.icon, { sx: { fontSize: 32, color: nairobiColors.gold.dark } })}
+                  <Typography variant="subtitle1" fontWeight={700} sx={{ color: nairobiColors.green.dark }}>
+                    {f.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {f.desc}
+                  </Typography>
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Testimonials */}
+      <Box sx={{ position: 'relative', py: { xs: 7, md: 10 }, overflow: 'hidden' }}>
+        <Box
+          component="img"
+          src="/nairobi-lion-statue.png"
+          alt=""
+          sx={{
+            position: 'absolute', inset: 0, width: '100%', height: '100%',
+            objectFit: 'cover', filter: 'blur(4px) grayscale(1)', opacity: 0.25, transform: 'scale(1.05)',
+          }}
+        />
+        <Box sx={{ position: 'absolute', inset: 0, bgcolor: alpha(nairobiColors.green.pale, 0.75) }} />
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+          <Grid container spacing={3}>
+            {TESTIMONIALS.map((t) => (
+              <Grid item xs={12} md={6} key={t.name}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 4, height: '100%', borderRadius: 3,
+                    border: `1px solid ${alpha(nairobiColors.green.main, 0.1)}`,
+                    display: 'flex', flexDirection: 'column', gap: 2,
+                  }}
+                >
+                  <FormatQuote sx={{ fontSize: 36, color: alpha(nairobiColors.green.main, 0.3) }} />
+                  <Typography variant="body1" sx={{ fontStyle: 'italic', color: 'text.primary', lineHeight: 1.7 }}>
+                    {t.quote}
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 'auto' }}>
+                    <Avatar sx={{ bgcolor: alpha(t.color, 0.15), color: t.color, fontWeight: 700 }}>
+                      {t.initials}
+                    </Avatar>
+                    <Box>
+                      <Typography variant="body2" fontWeight={700} sx={{ color: t.color }}>
+                        {t.name}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {t.role}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Footer */}
+      <Box component="footer" sx={{ bgcolor: nairobiColors.green.main, color: '#fff', position: 'relative' }}>
+        <Box sx={{ position: 'relative', height: { xs: 110, md: 150 }, overflow: 'hidden' }}>
+          <Box
+            component="img"
+            src="/nairobi-giraffes.png"
+            alt="Giraffes at the Giraffe Centre, Nairobi"
+            sx={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%' }}
+          />
+          <Box sx={{
+            position: 'absolute', inset: 0,
+            background: `linear-gradient(180deg, ${alpha(nairobiColors.green.dark, 0.25)} 0%, ${nairobiColors.green.main} 100%)`,
+          }} />
+        </Box>
+        <Container maxWidth="lg" sx={{ pt: { xs: 5, md: 8 }, pb: 4 }}>
+          <Grid container spacing={4} justifyContent="space-between">
+            <Grid item xs={12} md={5}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+                <Box sx={{
+                  px: 1.2, py: 0.6, borderRadius: 2,
+                  bgcolor: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <NairobiCoatOfArms size={24} />
+                </Box>
+                <Typography variant="h6" fontWeight={700} sx={{ color: nairobiColors.gold.light }}>
+                  Nairobi City County
+                </Typography>
+              </Box>
+              <Typography variant="body2" sx={{ color: alpha('#fff', 0.8), maxWidth: 360 }}>
+                Dedicated to excellence in service delivery and citizen-centered governance for the Green City in the Sun.
+              </Typography>
+            </Grid>
+            <Grid item xs={6} md={3}>
+              <Typography variant="subtitle2" fontWeight={700} sx={{ color: nairobiColors.gold.light, mb: 1.5 }}>
+                Quick Links
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <Typography component="a" href="#" variant="body2" sx={{ color: alpha('#fff', 0.8), textDecoration: 'none', '&:hover': { color: nairobiColors.gold.light } }}>
+                  Privacy Policy
+                </Typography>
+                <Typography component="a" href="#" variant="body2" sx={{ color: alpha('#fff', 0.8), textDecoration: 'none', '&:hover': { color: nairobiColors.gold.light } }}>
+                  Terms of Service
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={6} md={3}>
+              <Typography variant="subtitle2" fontWeight={700} sx={{ color: nairobiColors.gold.light, mb: 1.5 }}>
+                Support
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <Typography component="a" href="#" variant="body2" sx={{ color: alpha('#fff', 0.8), textDecoration: 'none', '&:hover': { color: nairobiColors.gold.light } }}>
+                  Help Center
+                </Typography>
+                <Typography component="a" href="#" variant="body2" sx={{ color: alpha('#fff', 0.8), textDecoration: 'none', '&:hover': { color: nairobiColors.gold.light } }}>
+                  Public Notices
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
+          <Box sx={{ borderTop: `1px solid ${alpha('#fff', 0.15)}`, mt: 5, pt: 3, textAlign: 'center' }}>
+            <Typography variant="caption" sx={{ color: alpha('#fff', 0.6) }}>
+              © {new Date().getFullYear()} Nairobi City County. All Rights Reserved.
+            </Typography>
+          </Box>
+        </Container>
+      </Box>
+    </Box>
+  );
+};
+
+export default LandingPage;
