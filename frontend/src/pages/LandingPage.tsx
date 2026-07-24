@@ -1,23 +1,16 @@
 import React from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import {
-  Box, Container, Typography, Button, Grid, Paper, Avatar, Chip, alpha, Fade,
+  Box, Container, Typography, Button, Grid, Paper, Chip, alpha, Fade,
 } from '@mui/material';
 import {
   Description, Assessment, CheckCircle, Star, WaterDrop, AddRoad,
   DeleteSweep, Security, MedicalServices, Forest, Apartment, School,
-  Psychology, GpsFixed, BarChart, FormatQuote, ArrowForward,
+  Psychology, GpsFixed, BarChart, ArrowForward,
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import NairobiCoatOfArms from '../components/NairobiCoatOfArms';
 import { nairobiColors } from '../theme/nairobiTheme';
-
-const STATS = [
-  { value: '15,420+', label: 'Issues Resolved', color: nairobiColors.green.main },
-  { value: '48h', label: 'Avg Response Time', color: nairobiColors.gold.dark },
-  { value: '94%', label: 'Resolution Rate', color: '#2E7D32' },
-  { value: '85', label: 'Wards Covered', color: nairobiColors.maroon.main },
-];
 
 const STEPS = [
   { icon: <Description />, title: '1. Submit', desc: 'Capture details and photos of the issue through our simple e-form.' },
@@ -52,23 +45,6 @@ const FEATURES = [
     icon: <BarChart />,
     title: 'Ward-Level Analytics',
     desc: 'Transparent dashboards showing performance metrics across all 85 wards of Nairobi.',
-  },
-];
-
-const TESTIMONIALS = [
-  {
-    quote: '"Reporting the burst pipe in Upper Hill was seamless. The water was restored within 24 hours. This portal brings government closer to us."',
-    name: 'Jane Muthoni',
-    role: 'Citizen, Kilimani Ward',
-    initials: 'JM',
-    color: nairobiColors.green.main,
-  },
-  {
-    quote: '"The data from this platform allows us to allocate resources more efficiently. We now solve problems based on live community feedback."',
-    name: 'Hon. Otieno K.',
-    role: 'County Official',
-    initials: 'OK',
-    color: nairobiColors.gold.dark,
   },
 ];
 
@@ -225,46 +201,6 @@ const LandingPage: React.FC = () => {
         </Container>
       </Box>
 
-      {/* Live Impact Stats */}
-      <Box sx={{ position: 'relative', py: { xs: 5, md: 7 }, overflow: 'hidden', mt: -1 }}>
-        <Box
-          component="img"
-          src="/nairobi-skyline-night.png"
-          alt=""
-          sx={{
-            position: 'absolute', inset: 0, width: '100%', height: '100%',
-            objectFit: 'cover', filter: 'blur(3px)', transform: 'scale(1.05)',
-          }}
-        />
-        <Box sx={{ position: 'absolute', inset: 0, bgcolor: alpha('#0F2A1A', 0.78) }} />
-        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
-          <Grid container spacing={3}>
-            {STATS.map((stat) => (
-              <Grid item xs={6} md={3} key={stat.label}>
-                <Fade in timeout={600}>
-                  <Paper
-                    elevation={0}
-                    sx={{
-                      p: 3, borderRadius: 3, borderTop: `4px solid ${stat.color}`,
-                      bgcolor: alpha('#fff', 0.94), backdropFilter: 'blur(20px)',
-                      transition: 'transform 0.3s ease',
-                      '&:hover': { transform: 'translateY(-4px)' },
-                    }}
-                  >
-                    <Typography variant="h4" fontWeight={800} sx={{ color: stat.color }}>
-                      {stat.value}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600, mt: 0.5 }}>
-                      {stat.label}
-                    </Typography>
-                  </Paper>
-                </Fade>
-              </Grid>
-            ))}
-          </Grid>
-        </Container>
-      </Box>
-
       {/* How It Works */}
       <Box id="how-it-works" sx={{ py: { xs: 7, md: 10 }, bgcolor: '#F5F7F4' }}>
         <Container maxWidth="lg">
@@ -377,68 +313,9 @@ const LandingPage: React.FC = () => {
         </Container>
       </Box>
 
-      {/* Testimonials */}
-      <Box sx={{ position: 'relative', py: { xs: 7, md: 10 }, overflow: 'hidden' }}>
-        <Box
-          component="img"
-          src="/nairobi-lion-statue.png"
-          alt=""
-          sx={{
-            position: 'absolute', inset: 0, width: '100%', height: '100%',
-            objectFit: 'cover', filter: 'blur(4px) grayscale(1)', opacity: 0.25, transform: 'scale(1.05)',
-          }}
-        />
-        <Box sx={{ position: 'absolute', inset: 0, bgcolor: alpha(nairobiColors.green.pale, 0.75) }} />
-        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
-          <Grid container spacing={3}>
-            {TESTIMONIALS.map((t) => (
-              <Grid item xs={12} md={6} key={t.name}>
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 4, height: '100%', borderRadius: 3,
-                    border: `1px solid ${alpha(nairobiColors.green.main, 0.1)}`,
-                    display: 'flex', flexDirection: 'column', gap: 2,
-                  }}
-                >
-                  <FormatQuote sx={{ fontSize: 36, color: alpha(nairobiColors.green.main, 0.3) }} />
-                  <Typography variant="body1" sx={{ fontStyle: 'italic', color: 'text.primary', lineHeight: 1.7 }}>
-                    {t.quote}
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 'auto' }}>
-                    <Avatar sx={{ bgcolor: alpha(t.color, 0.15), color: t.color, fontWeight: 700 }}>
-                      {t.initials}
-                    </Avatar>
-                    <Box>
-                      <Typography variant="body2" fontWeight={700} sx={{ color: t.color }}>
-                        {t.name}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {t.role}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
-        </Container>
-      </Box>
-
       {/* Footer */}
       <Box component="footer" sx={{ bgcolor: nairobiColors.green.main, color: '#fff', position: 'relative' }}>
-        <Box sx={{ position: 'relative', height: { xs: 110, md: 150 }, overflow: 'hidden' }}>
-          <Box
-            component="img"
-            src="/nairobi-giraffes.png"
-            alt="Giraffes at the Giraffe Centre, Nairobi"
-            sx={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%' }}
-          />
-          <Box sx={{
-            position: 'absolute', inset: 0,
-            background: `linear-gradient(180deg, ${alpha(nairobiColors.green.dark, 0.25)} 0%, ${nairobiColors.green.main} 100%)`,
-          }} />
-        </Box>
+        <Box sx={{ height: 4, bgcolor: nairobiColors.gold.main }} />
         <Container maxWidth="lg" sx={{ pt: { xs: 5, md: 8 }, pb: 4 }}>
           <Grid container spacing={4} justifyContent="space-between">
             <Grid item xs={12} md={5}>

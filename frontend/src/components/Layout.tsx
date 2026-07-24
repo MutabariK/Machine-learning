@@ -7,11 +7,10 @@ import {
 } from '@mui/material';
 import {
   Menu as MenuIcon, Dashboard, ReportProblem, Assessment,
-  Description, Star, Logout, Person, People, AutoAwesome,
+  Description, Star, Logout, Person, People,
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import NairobiCoatOfArms from './NairobiCoatOfArms';
-import { WildlifeBanner } from './WildlifeIllustrations';
 import NotificationBell from './NotificationBell';
 import { nairobiColors } from '../theme/nairobiTheme';
 
@@ -177,34 +176,9 @@ const Layout: React.FC = () => {
         })}
       </List>
 
-      {/* AI badge */}
-      <Box sx={{ px: 2, pb: 1 }}>
-        <Box sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-          p: 1.5,
-          borderRadius: 2,
-          bgcolor: alpha(nairobiColors.green.main, 0.04),
-          border: `1px solid ${alpha(nairobiColors.green.main, 0.08)}`,
-        }}>
-          <AutoAwesome sx={{ fontSize: 16, color: nairobiColors.gold.main }} />
-          <Box>
-            <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.68rem', color: 'text.primary', display: 'block' }}>
-              AI-Powered
-            </Typography>
-            <Typography variant="caption" sx={{ fontSize: '0.58rem', color: 'text.disabled' }}>
-              MCP + 21st.dev Enhanced
-            </Typography>
-          </Box>
-        </Box>
-      </Box>
-
-      {/* Wildlife decoration */}
       <Box sx={{ borderTop: `1px solid ${alpha(nairobiColors.gold.main, 0.15)}`, mt: 'auto' }}>
-        <WildlifeBanner variant="sidebar" />
         <Typography variant="caption" sx={{
-          display: 'block', textAlign: 'center', pb: 1.5,
+          display: 'block', textAlign: 'center', py: 1.5,
           color: 'text.disabled', fontSize: '0.6rem',
         }}>
           Serving Nairobi Citizens

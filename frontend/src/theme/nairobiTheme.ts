@@ -70,12 +70,11 @@ const nairobiTheme = createTheme({
           transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
         },
         containedPrimary: {
-          background: `linear-gradient(135deg, ${nairobiColors.green.main} 0%, ${nairobiColors.green.dark} 100%)`,
-          boxShadow: `0 2px 8px ${alpha(nairobiColors.green.main, 0.25)}`,
+          backgroundColor: nairobiColors.green.main,
+          boxShadow: 'none',
           '&:hover': {
-            background: `linear-gradient(135deg, ${nairobiColors.green.dark} 0%, ${nairobiColors.green.main} 100%)`,
-            boxShadow: `0 4px 16px ${alpha(nairobiColors.green.main, 0.35)}`,
-            transform: 'translateY(-1px)',
+            backgroundColor: nairobiColors.green.dark,
+            boxShadow: 'none',
           },
         },
         outlined: {
@@ -165,8 +164,8 @@ const nairobiTheme = createTheme({
     MuiDialog: {
       styleOverrides: {
         paper: {
-          borderRadius: 16,
-          boxShadow: `0 16px 48px ${alpha('#000', 0.12)}`,
+          borderRadius: 12,
+          boxShadow: `0 8px 24px ${alpha('#000', 0.1)}`,
         },
       },
     },
