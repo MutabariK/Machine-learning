@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box, Paper, Typography, Button, Stepper, Step, StepLabel, Radio, RadioGroup,
   FormControlLabel, FormControl, FormLabel, TextField, MenuItem, Checkbox,
@@ -113,7 +114,10 @@ const CHART_COLORS = [
 
 const EvaluationPage: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
+  const [consented, setConsented] = useState(false);
+  const [consentChecked, setConsentChecked] = useState(false);
   const [tasksChecked, setTasksChecked] = useState<Record<number, boolean>>({});
   const [demographics, setDemographics] = useState({
     age_range: '', gender: '', education: '',
@@ -407,6 +411,57 @@ const EvaluationPage: React.FC = () => {
         <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
           Your evaluation has been recorded successfully. Your feedback is valuable in improving public service delivery in Nairobi County.
         </Typography>
+      </Box>
+    );
+  }
+
+  // --- Citizen: Informed Consent Gate ---
+  if (!consented) {
+    return (
+      <Box>
+        <Typography variant="h5" fontWeight={700} gutterBottom sx={{ color: nairobiColors.green.dark }}>
+          Informed Consent
+        </Typography>
+        <Paper sx={{ p: 4, maxWidth: 720 }}>
+          <Typography variant="body2" color="text.secondary" paragraph>
+            You are being invited to take part in a research evaluation of the Nairobi County
+            Citizen Engagement Platform, conducted as part of an academic thesis studying user
+            acceptance of the system.
+          </Typography>
+          <Typography variant="body2" color="text.secondary" paragraph>
+            If you agree, you will be asked to complete a short set of guided tasks on the
+            platform, followed by a questionnaire (roughly 5–10 minutes) about your experience.
+            Your participation is entirely voluntary: you may decline or stop at any point without
+            any effect on your use of the platform or your complaints.
+          </Typography>
+          <Typography variant="body2" color="text.secondary" paragraph>
+            Your responses are used only for this research and are reported anonymously; no
+            individual answer will be linked to you by name in any published results.
+          </Typography>
+          <FormControlLabel
+            sx={{ mt: 1 }}
+            control={
+              <Checkbox
+                checked={consentChecked}
+                onChange={(e) => setConsentChecked(e.target.checked)}
+                color="primary"
+              />
+            }
+            label="I have read the above and voluntarily agree to participate."
+          />
+          <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
+            <Button variant="outlined" onClick={() => navigate('/dashboard')}>
+              Decline
+            </Button>
+            <Button
+              variant="contained"
+              disabled={!consentChecked}
+              onClick={() => setConsented(true)}
+            >
+              I Agree — Begin Evaluation
+            </Button>
+          </Box>
+        </Paper>
       </Box>
     );
   }

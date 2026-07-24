@@ -362,6 +362,7 @@ const Layout: React.FC = () => {
       <Box component="main" sx={{
         flexGrow: 1,
         p: { xs: 2, sm: 3 },
+        pb: { xs: 12, sm: 12 },
         width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
         bgcolor: '#F5F7F4',
         minHeight: '100vh',
