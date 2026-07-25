@@ -580,9 +580,6 @@ const EvaluationPage: React.FC = () => {
       {activeStep === 2 && (
         <Paper sx={{ p: 4 }}>
           <Typography variant="h6" fontWeight={600} gutterBottom>Section B: System Usability Scale (SUS)</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            Reference: Brooke, J. (1986). "SUS: A Quick and Dirty Usability Scale."
-          </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
             Please rate each statement based on your experience using the platform. Select a value from 1 (Strongly Disagree) to 5 (Strongly Agree).
           </Typography>
