@@ -11,9 +11,9 @@ import {
   Title, Tooltip, Legend,
 } from 'chart.js';
 import { useAuth } from '../contexts/AuthContext';
-import { evaluationAPI } from '../services/api';
+import { evaluationAPI, complaintsAPI } from '../services/api';
 import StatCard from '../components/StatCard';
-import { Assessment, Star, TrendingUp, ThumbUp, People, School, Download } from '@mui/icons-material';
+import { Assessment, Star, TrendingUp, ThumbUp, People, School, Download, CheckCircle, RadioButtonUnchecked, Refresh } from '@mui/icons-material';
 import { nairobiColors } from '../theme/nairobiTheme';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
@@ -25,6 +25,12 @@ const TASKS = [
   { id: 4, text: 'Click the view icon (eye) on your complaint to see its full details.' },
   { id: 5, text: 'Submit a second complaint with Category "Roads" and a title and location of your choice.' },
 ];
+
+const REQUIRED_COMPLAINTS = 2;
+
+// Only the two "submit a complaint" tasks can be verified against real data;
+// navigation/viewing steps have no server-side trace to check.
+const TASK_VERIFICATION_THRESHOLD: Record<number, number> = { 2: 1, 5: 2 };
 
 const SUS_QUESTIONS = [
   'I think that I would like to use this system frequently.',
@@ -112,13 +118,16 @@ const CHART_COLORS = [
   nairobiColors.maroon.main,
 ];
 
+const consentStorageKey = (userId: number) => `evaluation_consent_${userId}`;
+
 const EvaluationPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
   const [consented, setConsented] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
-  const [tasksChecked, setTasksChecked] = useState<Record<number, boolean>>({});
+  const [myComplaintCount, setMyComplaintCount] = useState<number | null>(null);
+  const [checkingUsage, setCheckingUsage] = useState(false);
   const [demographics, setDemographics] = useState({
     age_range: '', gender: '', education: '',
     digital_service_frequency: '', reported_issue_before: '',
@@ -152,12 +161,32 @@ const EvaluationPage: React.FC = () => {
     }
   };
 
+  const refreshUsage = () => {
+    setCheckingUsage(true);
+    complaintsAPI.list({ page: 1 })
+      .then(res => setMyComplaintCount(res.data.count ?? 0))
+      .catch(() => setMyComplaintCount(0))
+      .finally(() => setCheckingUsage(false));
+  };
+
+  useEffect(() => {
+    if (user?.id && localStorage.getItem(consentStorageKey(user.id)) === 'true') {
+      setConsented(true);
+    }
+  }, [user?.id]);
+
+  const giveConsent = () => {
+    if (user?.id) localStorage.setItem(consentStorageKey(user.id), 'true');
+    setConsented(true);
+  };
+
   useEffect(() => {
     if (user?.role === 'citizen') {
       evaluationAPI.check()
         .then(res => { if (res.data.has_submitted) setSubmitted(true); })
         .catch(console.error)
         .finally(() => setChecking(false));
+      refreshUsage();
     } else {
       setAnalyticsLoading(true);
       evaluationAPI.getAnalytics()
@@ -174,8 +203,8 @@ const EvaluationPage: React.FC = () => {
   const validateStep = (): boolean => {
     setError('');
     if (activeStep === 0) {
-      if (Object.values(tasksChecked).filter(Boolean).length < TASKS.length) {
-        setError('Please complete all tasks and check each box before proceeding.');
+      if ((myComplaintCount ?? 0) < REQUIRED_COMPLAINTS) {
+        setError(`Please complete the tasks below using the platform first — we can only verify ${myComplaintCount ?? 0} of ${REQUIRED_COMPLAINTS} required complaint submissions so far.`);
         return false;
       }
     }
@@ -456,7 +485,7 @@ const EvaluationPage: React.FC = () => {
             <Button
               variant="contained"
               disabled={!consentChecked}
-              onClick={() => setConsented(true)}
+              onClick={giveConsent}
             >
               I Agree — Begin Evaluation
             </Button>
@@ -492,24 +521,50 @@ const EvaluationPage: React.FC = () => {
           <Typography variant="h6" fontWeight={600} gutterBottom>Guided Task Instructions</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
             Before completing the evaluation questionnaire, please perform the following tasks using the platform.
-            These tasks will help you experience the system's key features. Check each box after completing the task.
+            This step unlocks automatically once we can verify you've actually submitted complaints — it isn't a
+            self-report checklist.
           </Typography>
           <Alert severity="info" sx={{ mb: 3 }}>
-            This is an example. Use the side navigation menu to access "Submit Complaint" and "My Complaints" pages. Return to this page after completing all tasks.
+            Use the side navigation menu to access "Submit Complaint" and "My Complaints" pages, then return to this tab.
           </Alert>
           {TASKS.map((task) => (
-            <Box key={task.id} sx={{ py: 1.5, borderBottom: '1px solid #eee', display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-              <Checkbox
-                checked={tasksChecked[task.id] || false}
-                onChange={(e) => setTasksChecked({ ...tasksChecked, [task.id]: e.target.checked })}
-                color="primary"
-              />
-              <Box sx={{ pt: 1 }}>
+            <Box key={task.id} sx={{ py: 1.5, borderBottom: '1px solid #eee', display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+              <Box sx={{ pt: 0.3 }}>
+                {TASK_VERIFICATION_THRESHOLD[task.id] && (myComplaintCount ?? 0) >= TASK_VERIFICATION_THRESHOLD[task.id] ? (
+                  <CheckCircle sx={{ fontSize: 20, color: nairobiColors.green.main }} />
+                ) : (
+                  <RadioButtonUnchecked sx={{ fontSize: 20, color: 'text.disabled' }} />
+                )}
+              </Box>
+              <Box>
                 <Typography variant="body1" fontWeight={500}>Task {task.id}</Typography>
                 <Typography variant="body2" color="text.secondary">{task.text}</Typography>
               </Box>
             </Box>
           ))}
+
+          <Box sx={{
+            mt: 3, p: 2.5, borderRadius: 2,
+            bgcolor: (myComplaintCount ?? 0) >= REQUIRED_COMPLAINTS ? nairobiColors.green.pale : '#FFF4E5',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2,
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              {(myComplaintCount ?? 0) >= REQUIRED_COMPLAINTS ? (
+                <CheckCircle sx={{ color: nairobiColors.green.main }} />
+              ) : (
+                <RadioButtonUnchecked sx={{ color: nairobiColors.gold.dark }} />
+              )}
+              <Typography variant="body2" fontWeight={600}>
+                Verified complaint submissions: {myComplaintCount ?? '—'} of {REQUIRED_COMPLAINTS} required
+              </Typography>
+            </Box>
+            <Button
+              size="small" variant="outlined" startIcon={<Refresh />}
+              onClick={refreshUsage} disabled={checkingUsage}
+            >
+              {checkingUsage ? 'Checking...' : 'Refresh Status'}
+            </Button>
+          </Box>
         </Paper>
       )}
 
