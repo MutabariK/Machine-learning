@@ -24,6 +24,14 @@ export const nairobiColors = {
   sidebar: '#0F3D22',
   sidebarHover: '#174D2E',
   sidebarActive: '#1D6F42',
+  // Semantic status tokens — one name per meaning, so every page references
+  // the same color for the same status instead of ad-hoc hex values.
+  status: {
+    resolved: '#2E7D32',
+    pending: '#ED6C02',
+    inProgress: '#0288D1',
+    critical: '#8B1A1A',
+  },
 };
 
 const nairobiTheme = createTheme({
