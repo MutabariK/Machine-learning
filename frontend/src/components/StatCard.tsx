@@ -1,16 +1,17 @@
 import React from 'react';
 import { Paper, Typography, Box, alpha, Skeleton } from '@mui/material';
+import { LucideIcon } from 'lucide-react';
 
 interface Props {
   title: string;
   value: string | number;
-  icon: React.ReactNode;
+  icon: LucideIcon;
   color: string;
   trend?: { value: number; label: string };
   loading?: boolean;
 }
 
-const StatCard: React.FC<Props> = ({ title, value, icon, color, trend, loading }) => {
+const StatCard: React.FC<Props> = ({ title, value, icon: Icon, color, trend, loading }) => {
   if (loading) {
     return (
       <Paper
@@ -117,9 +118,7 @@ const StatCard: React.FC<Props> = ({ title, value, icon, color, trend, loading }
             boxShadow: `0 2px 8px ${alpha(color, 0.12)}`,
           }}
         >
-          {React.cloneElement(icon as React.ReactElement, {
-            sx: { fontSize: 26, color },
-          })}
+          <Icon size={26} color={color} strokeWidth={1.75} />
         </Box>
       </Box>
 

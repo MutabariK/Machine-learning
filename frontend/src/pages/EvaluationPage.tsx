@@ -13,7 +13,8 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { evaluationAPI } from '../services/api';
 import StatCard from '../components/StatCard';
-import { Assessment, Star, TrendingUp, ThumbUp, People, School, Download } from '@mui/icons-material';
+import EmptyState from '../components/EmptyState';
+import { ClipboardList, Star, TrendingUp, ThumbsUp, Users, GraduationCap, Download } from 'lucide-react';
 import { nairobiColors } from '../theme/nairobiTheme';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
@@ -246,10 +247,12 @@ const EvaluationPage: React.FC = () => {
       return (
         <Box>
           <Typography variant="h5" fontWeight={700} gutterBottom sx={{ color: nairobiColors.green.dark }}>Evaluation Results</Typography>
-          <Paper sx={{ p: 4, textAlign: 'center' }}>
-            <Assessment sx={{ fontSize: 64, color: nairobiColors.gold.light, mb: 2 }} />
-            <Typography variant="h6" color="text.secondary">No evaluation responses yet.</Typography>
-            <Typography variant="body2" color="text.secondary">Results will appear here once participants complete the evaluation.</Typography>
+          <Paper sx={{ p: 4 }}>
+            <EmptyState
+              icon={ClipboardList}
+              title="No evaluation responses yet."
+              description="Results will appear here once participants complete the evaluation."
+            />
           </Paper>
         </Box>
       );
@@ -268,7 +271,7 @@ const EvaluationPage: React.FC = () => {
           </Box>
           <Button
             variant="contained"
-            startIcon={<Download />}
+            startIcon={<Download size={18} strokeWidth={1.75} />}
             onClick={handleExport}
             disabled={exporting}
             sx={{ bgcolor: nairobiColors.green.main, '&:hover': { bgcolor: nairobiColors.green.dark } }}
@@ -279,22 +282,22 @@ const EvaluationPage: React.FC = () => {
 
         <Grid container spacing={3} sx={{ mt: 1 }}>
           <Grid item xs={6} sm={4} md={2}>
-            <StatCard title="Responses" value={analytics.total_responses} icon={<People />} color={nairobiColors.green.main} />
+            <StatCard title="Responses" value={analytics.total_responses} icon={Users} color={nairobiColors.green.main} />
           </Grid>
           <Grid item xs={6} sm={4} md={2}>
-            <StatCard title="SUS Score" value={sus.average_score} icon={<Star />} color={nairobiColors.gold.main} />
+            <StatCard title="SUS Score" value={sus.average_score} icon={Star} color={nairobiColors.gold.main} />
           </Grid>
           <Grid item xs={6} sm={4} md={2}>
-            <StatCard title="SUS Grade" value={sus.grade} icon={<School />} color="#4CAF50" />
+            <StatCard title="SUS Grade" value={sus.grade} icon={GraduationCap} color="#4CAF50" />
           </Grid>
           <Grid item xs={6} sm={4} md={2}>
-            <StatCard title="Usefulness" value={`${tam.perceived_usefulness.mean}/5`} icon={<ThumbUp />} color="#2196F3" />
+            <StatCard title="Usefulness" value={`${tam.perceived_usefulness.mean}/5`} icon={ThumbsUp} color="#2196F3" />
           </Grid>
           <Grid item xs={6} sm={4} md={2}>
-            <StatCard title="Ease of Use" value={`${tam.perceived_ease_of_use.mean}/5`} icon={<TrendingUp />} color={nairobiColors.maroon.main} />
+            <StatCard title="Ease of Use" value={`${tam.perceived_ease_of_use.mean}/5`} icon={TrendingUp} color={nairobiColors.maroon.main} />
           </Grid>
           <Grid item xs={6} sm={4} md={2}>
-            <StatCard title="Intention" value={`${tam.behavioral_intention.mean}/5`} icon={<Assessment />} color={nairobiColors.gold.dark} />
+            <StatCard title="Intention" value={`${tam.behavioral_intention.mean}/5`} icon={ClipboardList} color={nairobiColors.gold.dark} />
           </Grid>
         </Grid>
 
@@ -406,7 +409,7 @@ const EvaluationPage: React.FC = () => {
   if (submitted) {
     return (
       <Box sx={{ textAlign: 'center', mt: 8 }}>
-        <Star sx={{ fontSize: 80, color: nairobiColors.gold.main }} />
+        <Star size={80} color={nairobiColors.gold.main} strokeWidth={1.5} />
         <Typography variant="h4" fontWeight={700} sx={{ mt: 2, color: nairobiColors.green.dark }}>Thank You!</Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
           Your evaluation has been recorded successfully. Your feedback is valuable in improving public service delivery in Nairobi County.

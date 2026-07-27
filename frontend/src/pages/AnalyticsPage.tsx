@@ -10,7 +10,7 @@ import {
 import { analyticsAPI } from '../services/api';
 import { SummaryStats, CategoryStat, WardStat, TrendData, OfficialStat } from '../types';
 import StatCard from '../components/StatCard';
-import { Assessment, CheckCircle, Timer, TrendingUp, PendingActions, Speed, Download } from '@mui/icons-material';
+import { ClipboardList, CheckCircle2, Timer, TrendingUp, Hourglass, Gauge, Download } from 'lucide-react';
 import { nairobiColors } from '../theme/nairobiTheme';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, PointElement, LineElement, Title, Tooltip, Legend, Filler);
@@ -97,7 +97,7 @@ const AnalyticsPage: React.FC = () => {
           <Typography variant="body2" color="text.secondary">Service delivery analysis — last {days} days</Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button variant="outlined" startIcon={<Download />} onClick={handleExportCSV}>
+          <Button variant="outlined" startIcon={<Download size={18} strokeWidth={1.75} />} onClick={handleExportCSV}>
             Export CSV
           </Button>
           <TextField size="small" label="Period" select value={period} onChange={(e) => setPeriod(e.target.value)} sx={{ width: 120 }}>
@@ -116,22 +116,22 @@ const AnalyticsPage: React.FC = () => {
 
       <Grid container spacing={3}>
         <Grid item xs={6} sm={4} md={2}>
-          <StatCard title="Total" value={stats?.total_complaints || 0} icon={<Assessment />} color={nairobiColors.green.main} />
+          <StatCard title="Total" value={stats?.total_complaints || 0} icon={ClipboardList} color={nairobiColors.green.main} />
         </Grid>
         <Grid item xs={6} sm={4} md={2}>
-          <StatCard title="Open" value={stats?.open_complaints || 0} icon={<PendingActions />} color={nairobiColors.gold.main} />
+          <StatCard title="Open" value={stats?.open_complaints || 0} icon={Hourglass} color={nairobiColors.gold.main} />
         </Grid>
         <Grid item xs={6} sm={4} md={2}>
-          <StatCard title="Resolved" value={stats?.resolved_complaints || 0} icon={<CheckCircle />} color="#4CAF50" />
+          <StatCard title="Resolved" value={stats?.resolved_complaints || 0} icon={CheckCircle2} color="#4CAF50" />
         </Grid>
         <Grid item xs={6} sm={4} md={2}>
-          <StatCard title="Closed" value={stats?.closed_complaints || 0} icon={<Speed />} color="#607D8B" />
+          <StatCard title="Closed" value={stats?.closed_complaints || 0} icon={Gauge} color="#607D8B" />
         </Grid>
         <Grid item xs={6} sm={4} md={2}>
-          <StatCard title="Rate" value={`${stats?.resolution_rate || 0}%`} icon={<TrendingUp />} color={nairobiColors.maroon.main} />
+          <StatCard title="Rate" value={`${stats?.resolution_rate || 0}%`} icon={TrendingUp} color={nairobiColors.maroon.main} />
         </Grid>
         <Grid item xs={6} sm={4} md={2}>
-          <StatCard title="Avg Resp." value={`${stats?.avg_response_time_hours || 0}h`} icon={<Timer />} color={nairobiColors.gold.dark} />
+          <StatCard title="Avg Resp." value={`${stats?.avg_response_time_hours || 0}h`} icon={Timer} color={nairobiColors.gold.dark} />
         </Grid>
       </Grid>
 

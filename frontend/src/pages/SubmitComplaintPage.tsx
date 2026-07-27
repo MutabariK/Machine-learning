@@ -5,8 +5,8 @@ import {
   Chip, Fade, CircularProgress, Collapse,
 } from '@mui/material';
 import {
-  Send, CloudUpload, Delete, AutoAwesome, Lightbulb, CheckCircle,
-} from '@mui/icons-material';
+  Send, Upload, Trash2, Sparkles, Lightbulb, CheckCircle2,
+} from 'lucide-react';
 import { complaintsAPI, aiAPI } from '../services/api';
 import { Category, Ward } from '../types';
 import { nairobiColors } from '../theme/nairobiTheme';
@@ -127,7 +127,7 @@ const SubmitComplaintPage: React.FC = () => {
     return (
       <Fade in timeout={500}>
         <Box sx={{ textAlign: 'center', mt: 8 }}>
-          <CheckCircle sx={{ fontSize: 80, color: nairobiColors.green.main, mb: 2 }} />
+          <CheckCircle2 size={80} color={nairobiColors.green.main} strokeWidth={1.5} style={{ marginBottom: 16 }} />
           <Typography variant="h5" fontWeight={700} sx={{ color: nairobiColors.green.dark }}>
             Complaint Submitted Successfully!
           </Typography>
@@ -209,10 +209,10 @@ const SubmitComplaintPage: React.FC = () => {
                       </>
                     ) : aiSuggestion?.suggested_category ? (
                       <>
-                        <AutoAwesome sx={{ fontSize: 18, color: nairobiColors.gold.main }} />
+                        <Sparkles size={18} color={nairobiColors.gold.main} strokeWidth={1.75} />
                         <Box sx={{ flex: 1 }}>
-                          <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.82rem' }}>
-                            <Lightbulb sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle', color: nairobiColors.gold.main }} />
+                          <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Lightbulb size={14} color={nairobiColors.gold.main} strokeWidth={1.75} />
                             AI Suggestion: {aiSuggestion.suggested_category}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
@@ -270,7 +270,7 @@ const SubmitComplaintPage: React.FC = () => {
               </Grid>
               <Grid item xs={12}>
                 <Button
-                  component="label" variant="outlined" startIcon={<CloudUpload />}
+                  component="label" variant="outlined" startIcon={<Upload size={18} strokeWidth={1.75} />}
                   sx={{
                     borderStyle: 'dashed',
                     py: 1.5,
@@ -305,7 +305,7 @@ const SubmitComplaintPage: React.FC = () => {
                         '&:hover': { bgcolor: nairobiColors.maroon.dark },
                       }}
                     >
-                      <Delete fontSize="small" />
+                      <Trash2 size={18} strokeWidth={1.75} />
                     </IconButton>
                   </Box>
                 )}
@@ -313,7 +313,7 @@ const SubmitComplaintPage: React.FC = () => {
               <Grid item xs={12}>
                 <Button
                   type="submit" variant="contained" size="large" disabled={loading}
-                  startIcon={<Send />}
+                  startIcon={<Send size={18} strokeWidth={1.75} />}
                   sx={{
                     py: 1.5,
                     px: 5,

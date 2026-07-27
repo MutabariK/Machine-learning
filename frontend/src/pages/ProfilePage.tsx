@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Box, Paper, Typography, TextField, Button, Alert, Grid, Avatar, IconButton,
 } from '@mui/material';
-import { PhotoCamera } from '@mui/icons-material';
+import { Camera } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { authAPI } from '../services/api';
 import { nairobiColors } from '../theme/nairobiTheme';
@@ -105,7 +105,7 @@ const ProfilePage: React.FC = () => {
               <Box>
                 <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/gif,image/webp" hidden onChange={handleAvatarChange} />
                 <Button
-                  size="small" variant="outlined" startIcon={<PhotoCamera />}
+                  size="small" variant="outlined" startIcon={<Camera size={18} strokeWidth={1.75} />}
                   disabled={avatarUploading}
                   onClick={() => fileInputRef.current?.click()}
                 >

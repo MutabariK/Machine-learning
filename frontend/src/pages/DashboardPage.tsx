@@ -4,14 +4,15 @@ import {
   LinearProgress, Tooltip,
 } from '@mui/material';
 import {
-  Assessment, CheckCircle, PendingActions, Speed, Timer, TrendingUp,
-  AccessTime, Category, LocationOn,
-} from '@mui/icons-material';
+  ClipboardList, CheckCircle2, Hourglass, Gauge, Timer, TrendingUp,
+  Clock, Tag, MapPin,
+} from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { analyticsAPI, complaintsAPI } from '../services/api';
 import { SummaryStats, Complaint, WardStat } from '../types';
 import StatCard from '../components/StatCard';
+import EmptyState from '../components/EmptyState';
 import { nairobiColors } from '../theme/nairobiTheme';
 
 function wardEfficiencyColor(rate: number): string {
@@ -21,11 +22,11 @@ function wardEfficiencyColor(rate: number): string {
 }
 
 const statusConfig: Record<string, { bg: string; color: string; label: string; icon: React.ReactNode }> = {
-  submitted: { bg: alpha('#FF9800', 0.1), color: '#E65100', label: 'Submitted', icon: <AccessTime sx={{ fontSize: 14 }} /> },
-  under_review: { bg: alpha(nairobiColors.green.light, 0.1), color: nairobiColors.green.main, label: 'Under Review', icon: <Assessment sx={{ fontSize: 14 }} /> },
-  in_progress: { bg: alpha('#2196F3', 0.1), color: '#1565C0', label: 'In Progress', icon: <Speed sx={{ fontSize: 14 }} /> },
-  resolved: { bg: alpha('#4CAF50', 0.1), color: '#2E7D32', label: 'Resolved', icon: <CheckCircle sx={{ fontSize: 14 }} /> },
-  closed: { bg: alpha('#607D8B', 0.1), color: '#37474F', label: 'Closed', icon: <CheckCircle sx={{ fontSize: 14 }} /> },
+  submitted: { bg: alpha('#FF9800', 0.1), color: '#E65100', label: 'Submitted', icon: <Clock size={14} /> },
+  under_review: { bg: alpha(nairobiColors.green.light, 0.1), color: nairobiColors.green.main, label: 'Under Review', icon: <ClipboardList size={14} /> },
+  in_progress: { bg: alpha('#2196F3', 0.1), color: '#1565C0', label: 'In Progress', icon: <Gauge size={14} /> },
+  resolved: { bg: alpha('#4CAF50', 0.1), color: '#2E7D32', label: 'Resolved', icon: <CheckCircle2 size={14} /> },
+  closed: { bg: alpha('#607D8B', 0.1), color: '#37474F', label: 'Closed', icon: <CheckCircle2 size={14} /> },
 };
 
 const ComplaintItem: React.FC<{ complaint: Complaint; index: number }> = ({ complaint, index }) => {
@@ -58,8 +59,8 @@ const ComplaintItem: React.FC<{ complaint: Complaint; index: number }> = ({ comp
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
             <Tooltip title="Category">
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
-                <Category sx={{ fontSize: 12, color: 'text.disabled' }} />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3, color: 'text.disabled' }}>
+                <Tag size={12} color="currentColor" />
                 <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
                   {complaint.category_name}
                 </Typography>
@@ -67,8 +68,8 @@ const ComplaintItem: React.FC<{ complaint: Complaint; index: number }> = ({ comp
             </Tooltip>
             {complaint.ward_name && (
               <Tooltip title="Ward">
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
-                  <LocationOn sx={{ fontSize: 12, color: 'text.disabled' }} />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3, color: 'text.disabled' }}>
+                  <MapPin size={12} color="currentColor" />
                   <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
                     {complaint.ward_name}
                   </Typography>
@@ -76,8 +77,8 @@ const ComplaintItem: React.FC<{ complaint: Complaint; index: number }> = ({ comp
               </Tooltip>
             )}
             <Tooltip title="Date submitted">
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
-                <AccessTime sx={{ fontSize: 12, color: 'text.disabled' }} />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3, color: 'text.disabled' }}>
+                <Clock size={12} color="currentColor" />
                 <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
                   {new Date(complaint.created_at).toLocaleDateString()}
                 </Typography>
@@ -164,7 +165,7 @@ const DashboardPage: React.FC = () => {
         <Grid container spacing={3}>
           {[1, 2, 3, 4].map(i => (
             <Grid item xs={12} sm={6} md={3} key={i}>
-              <StatCard title="" value="" icon={<Assessment />} color="#ccc" loading />
+              <StatCard title="" value="" icon={ClipboardList} color="#ccc" loading />
             </Grid>
           ))}
         </Grid>
@@ -206,16 +207,16 @@ const DashboardPage: React.FC = () => {
 
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6} md={3}>
-              <StatCard title="Total Submissions" value={citizenCounts.total} icon={<Assessment />} color={nairobiColors.green.main} />
+              <StatCard title="Total Submissions" value={citizenCounts.total} icon={ClipboardList} color={nairobiColors.green.main} />
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <StatCard title="Pending Review" value={citizenCounts.pending} icon={<PendingActions />} color={nairobiColors.gold.main} />
+              <StatCard title="Pending Review" value={citizenCounts.pending} icon={Hourglass} color={nairobiColors.gold.main} />
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <StatCard title="In Progress" value={citizenCounts.in_progress} icon={<Speed />} color="#2196F3" />
+              <StatCard title="In Progress" value={citizenCounts.in_progress} icon={Gauge} color="#2196F3" />
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <StatCard title="Resolved" value={citizenCounts.resolved} icon={<CheckCircle />} color="#4CAF50" />
+              <StatCard title="Resolved" value={citizenCounts.resolved} icon={CheckCircle2} color="#4CAF50" />
             </Grid>
           </Grid>
 
@@ -292,12 +293,12 @@ const DashboardPage: React.FC = () => {
             </Box>
             <Box sx={{ px: 1 }}>
               {recentComplaints.length === 0 ? (
-                <Box sx={{ py: 6, textAlign: 'center' }}>
-                  <Assessment sx={{ fontSize: 48, color: alpha(nairobiColors.green.main, 0.15), mb: 1 }} />
-                  <Typography color="text.secondary" variant="body2">
-                    No complaints yet. Submit your first complaint to get started.
-                  </Typography>
-                </Box>
+                <EmptyState
+                  icon={ClipboardList}
+                  title="No complaints yet"
+                  description="Submit your first complaint to get started."
+                  compact
+                />
               ) : (
                 recentComplaints.map((c, i) => <ComplaintItem key={c.id} complaint={c} index={i} />)
               )}
@@ -323,16 +324,16 @@ const DashboardPage: React.FC = () => {
 
         <Grid container spacing={3}>
           <Grid item xs={12} sm={6} md={3}>
-            <StatCard title="Total Complaints" value={stats?.total_complaints || 0} icon={<Assessment />} color={nairobiColors.green.main} />
+            <StatCard title="Total Complaints" value={stats?.total_complaints || 0} icon={ClipboardList} color={nairobiColors.green.main} />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <StatCard title="Open Complaints" value={stats?.open_complaints || 0} icon={<PendingActions />} color={nairobiColors.maroon.main} />
+            <StatCard title="Open Complaints" value={stats?.open_complaints || 0} icon={Hourglass} color={nairobiColors.maroon.main} />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <StatCard title="Resolution Rate" value={`${stats?.resolution_rate || 0}%`} icon={<TrendingUp />} color="#4CAF50" />
+            <StatCard title="Resolution Rate" value={`${stats?.resolution_rate || 0}%`} icon={TrendingUp} color="#4CAF50" />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <StatCard title="Avg Response" value={`${stats?.avg_response_time_hours || 0}h`} icon={<Timer />} color={nairobiColors.gold.dark} />
+            <StatCard title="Avg Response" value={`${stats?.avg_response_time_hours || 0}h`} icon={Timer} color={nairobiColors.gold.dark} />
           </Grid>
         </Grid>
 

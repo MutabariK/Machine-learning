@@ -6,9 +6,9 @@ import {
   Alert, LinearProgress, Divider, alpha,
 } from '@mui/material';
 import {
-  Visibility, Edit, CheckCircle, RadioButtonUnchecked,
-  AccessTime, Schedule,
-} from '@mui/icons-material';
+  Eye, Pencil, CheckCircle2, Circle,
+  Clock, CalendarClock,
+} from 'lucide-react';
 import { complaintsAPI, usersAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { Complaint, Category, Ward, User } from '../types';
@@ -205,11 +205,11 @@ const ComplaintsPage: React.FC = () => {
                 </TableCell>
                 <TableCell>
                   <IconButton size="small" onClick={() => handleViewDetail(c.id)} aria-label="View complaint details">
-                    <Visibility sx={{ color: nairobiColors.green.main }} />
+                    <Eye size={20} color={nairobiColors.green.main} strokeWidth={1.75} />
                   </IconButton>
                   {user?.role !== 'citizen' && (
                     <IconButton size="small" onClick={() => handleOpenUpdate(c)} aria-label="Update complaint status">
-                      <Edit sx={{ color: nairobiColors.gold.dark }} />
+                      <Pencil size={20} color={nairobiColors.gold.dark} strokeWidth={1.75} />
                     </IconButton>
                   )}
                 </TableCell>
@@ -260,8 +260,8 @@ const ComplaintsPage: React.FC = () => {
                   }}
                 />
                 {getEstimatedDays(selectedComplaint.status) && (
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
-                    <Schedule sx={{ fontSize: 14, color: 'text.secondary' }} />
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5, color: 'text.secondary' }}>
+                    <CalendarClock size={14} color="currentColor" />
                     <Typography variant="caption" color="text.secondary">
                       {getEstimatedDays(selectedComplaint.status)}
                     </Typography>
@@ -278,9 +278,9 @@ const ComplaintsPage: React.FC = () => {
                     <React.Fragment key={step}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         {reached ? (
-                          <CheckCircle sx={{ fontSize: 20, color: STATUS_COLORS[step] }} />
+                          <CheckCircle2 size={20} color={STATUS_COLORS[step]} />
                         ) : (
-                          <RadioButtonUnchecked sx={{ fontSize: 20, color: '#bdbdbd' }} />
+                          <Circle size={20} color="#bdbdbd" />
                         )}
                         <Typography variant="caption" sx={{ fontWeight: reached ? 600 : 400, color: reached ? STATUS_COLORS[step] : '#9e9e9e' }}>
                           {STATUS_LABELS[step]}
@@ -346,8 +346,8 @@ const ComplaintsPage: React.FC = () => {
                               </Typography>
                             )}
                           </Box>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
-                            <AccessTime sx={{ fontSize: 12, color: 'text.secondary' }} />
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5, color: 'text.secondary' }}>
+                            <Clock size={12} color="currentColor" />
                             <Typography variant="caption" color="text.secondary">
                               {new Date(h.changed_at).toLocaleString()} ({timeAgo(h.changed_at)})
                             </Typography>

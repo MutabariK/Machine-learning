@@ -5,9 +5,9 @@ import {
   InputAdornment, CircularProgress, Fade,
 } from '@mui/material';
 import {
-  SmartToy, Close, Send, AutoAwesome, NavigateNext,
-  Psychology, Lightbulb,
-} from '@mui/icons-material';
+  Bot, X, Send, Sparkles, ChevronRight,
+  Brain, Lightbulb,
+} from 'lucide-react';
 import { aiAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { nairobiColors } from '../theme/nairobiTheme';
@@ -136,7 +136,7 @@ const AIAssistant: React.FC = () => {
             },
           }}
         >
-          <AutoAwesome sx={{ fontSize: 28, color: nairobiColors.gold.light }} />
+          <Sparkles size={28} color={nairobiColors.gold.light} strokeWidth={1.75} />
         </Fab>
       </Tooltip>
 
@@ -186,7 +186,7 @@ const AIAssistant: React.FC = () => {
               border: `1.5px solid ${alpha(nairobiColors.gold.main, 0.5)}`,
             }}
           >
-            <Psychology sx={{ fontSize: 20, color: nairobiColors.gold.light }} />
+            <Brain size={20} color={nairobiColors.gold.light} strokeWidth={1.75} />
           </Avatar>
           <Box sx={{ flex: 1 }}>
             <Typography variant="subtitle1" sx={{ color: '#fff', fontWeight: 700, lineHeight: 1.2 }}>
@@ -197,7 +197,7 @@ const AIAssistant: React.FC = () => {
             </Typography>
           </Box>
           <IconButton onClick={() => setOpen(false)} size="small" sx={{ color: alpha('#fff', 0.8) }}>
-            <Close fontSize="small" />
+            <X size={18} strokeWidth={1.75} />
           </IconButton>
         </DialogTitle>
 
@@ -222,7 +222,7 @@ const AIAssistant: React.FC = () => {
           {messages.length === 0 && (
             <Fade in timeout={500}>
               <Box sx={{ textAlign: 'center', py: 2 }}>
-                <SmartToy sx={{ fontSize: 48, color: alpha(nairobiColors.green.main, 0.3), mb: 1 }} />
+                <Bot size={48} color={alpha(nairobiColors.green.main, 0.3)} strokeWidth={1.5} style={{ marginBottom: 8 }} />
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                   Hello{user?.full_name ? `, ${user.full_name.split(' ')[0]}` : ''}! I'm your AI assistant
                   for Nairobi County services. How can I help?
@@ -233,7 +233,7 @@ const AIAssistant: React.FC = () => {
                   {quickPrompts.map((prompt) => (
                     <Chip
                       key={prompt.label}
-                      icon={<Lightbulb sx={{ fontSize: 14 }} />}
+                      icon={<Lightbulb size={14} strokeWidth={1.75} />}
                       label={prompt.label}
                       size="small"
                       onClick={() => handleSend(prompt.message)}
@@ -278,7 +278,7 @@ const AIAssistant: React.FC = () => {
                       mt: 0.5,
                     }}
                   >
-                    <SmartToy sx={{ fontSize: 16, color: nairobiColors.green.main }} />
+                    <Bot size={16} color={nairobiColors.green.main} strokeWidth={1.75} />
                   </Avatar>
                 )}
                 <Box
@@ -324,7 +324,7 @@ const AIAssistant: React.FC = () => {
                           key={i}
                           label={action.label}
                           size="small"
-                          icon={<NavigateNext sx={{ fontSize: 14 }} />}
+                          icon={<ChevronRight size={14} strokeWidth={1.75} />}
                           onClick={() => { window.location.href = action.path; }}
                           sx={{
                             cursor: 'pointer',
@@ -353,7 +353,7 @@ const AIAssistant: React.FC = () => {
                   bgcolor: alpha(nairobiColors.green.main, 0.1),
                 }}
               >
-                <SmartToy sx={{ fontSize: 16, color: nairobiColors.green.main }} />
+                <Bot size={16} color={nairobiColors.green.main} strokeWidth={1.75} />
               </Avatar>
               <Box
                 sx={{
@@ -432,7 +432,7 @@ const AIAssistant: React.FC = () => {
                     {loading ? (
                       <CircularProgress size={16} sx={{ color: 'inherit' }} />
                     ) : (
-                      <Send sx={{ fontSize: 16 }} />
+                      <Send size={16} strokeWidth={1.75} />
                     )}
                   </IconButton>
                 </InputAdornment>

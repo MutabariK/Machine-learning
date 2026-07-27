@@ -5,7 +5,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions, Button, TablePagination,
   Alert, Switch, FormControlLabel, alpha,
 } from '@mui/material';
-import { Edit, Search, Delete, PersonAdd } from '@mui/icons-material';
+import { Pencil, Search, Trash2, UserPlus } from 'lucide-react';
 import { usersAPI, complaintsAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { User, Category } from '../types';
@@ -179,7 +179,7 @@ const UserManagementPage: React.FC = () => {
             <TextField
               fullWidth size="small" label="Search by name or email" value={filters.search}
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-              InputProps={{ endAdornment: <Search color="action" /> }}
+              InputProps={{ endAdornment: <Search size={20} strokeWidth={1.75} style={{ opacity: 0.6 }} /> }}
             />
           </Grid>
           <Grid item xs={12} sm={3}>
@@ -192,7 +192,7 @@ const UserManagementPage: React.FC = () => {
             </TextField>
           </Grid>
           <Grid item xs={12} sm={4} sx={{ display: 'flex', justifyContent: { sm: 'flex-end' } }}>
-            <Button variant="contained" startIcon={<PersonAdd />} onClick={handleOpenCreate}
+            <Button variant="contained" startIcon={<UserPlus size={18} strokeWidth={1.75} />} onClick={handleOpenCreate}
               sx={{ bgcolor: nairobiColors.green.main, '&:hover': { bgcolor: nairobiColors.green.dark } }}>
               Add User
             </Button>
@@ -240,7 +240,7 @@ const UserManagementPage: React.FC = () => {
                 <TableCell>{new Date(u.created_at).toLocaleDateString()}</TableCell>
                 <TableCell>
                   <IconButton size="small" onClick={() => handleOpenEdit(u)} aria-label="Edit user">
-                    <Edit sx={{ color: nairobiColors.gold.dark }} />
+                    <Pencil size={20} color={nairobiColors.gold.dark} strokeWidth={1.75} />
                   </IconButton>
                   <IconButton
                     size="small"
@@ -248,7 +248,11 @@ const UserManagementPage: React.FC = () => {
                     disabled={u.id === currentUser?.id}
                     aria-label="Delete user"
                   >
-                    <Delete sx={{ color: u.id === currentUser?.id ? 'action.disabled' : nairobiColors.maroon.main }} />
+                    <Trash2
+                      size={20}
+                      strokeWidth={1.75}
+                      color={u.id === currentUser?.id ? undefined : nairobiColors.maroon.main}
+                    />
                   </IconButton>
                 </TableCell>
               </TableRow>
