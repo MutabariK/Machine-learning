@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   AppBar, Box, CssBaseline, Divider, Drawer, IconButton, List, ListItem,
   ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography,
   Avatar, Menu, MenuItem, Chip, alpha, Tooltip, Fade,
 } from '@mui/material';
 import {
-  Menu as MenuIcon, Dashboard, ReportProblem, Assessment,
-  Description, Star, Logout, Person, People,
-} from '@mui/icons-material';
+  Menu as MenuIcon, LayoutDashboard, FileWarning, BarChart3,
+  FileText, Star, LogOut, User, Users,
+} from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import NairobiCoatOfArms from './NairobiCoatOfArms';
 import NotificationBell from './NotificationBell';
@@ -23,23 +24,25 @@ const Layout: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
+  const iconProps = { size: 20, strokeWidth: 1.75, color: 'currentColor' as const };
+
   const citizenMenu = [
-    { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
-    { text: 'Submit Complaint', icon: <ReportProblem />, path: '/submit-complaint' },
-    { text: 'My Complaints', icon: <Description />, path: '/my-complaints' },
-    { text: 'Evaluation', icon: <Star />, path: '/evaluation' },
+    { text: 'Dashboard', icon: <LayoutDashboard {...iconProps} />, path: '/dashboard' },
+    { text: 'Submit Complaint', icon: <FileWarning {...iconProps} />, path: '/submit-complaint' },
+    { text: 'My Complaints', icon: <FileText {...iconProps} />, path: '/my-complaints' },
+    { text: 'Evaluation', icon: <Star {...iconProps} />, path: '/evaluation' },
   ];
 
   const officialMenu = [
-    { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
-    { text: 'Complaints', icon: <ReportProblem />, path: '/complaints' },
-    { text: 'Analytics', icon: <Assessment />, path: '/analytics' },
-    { text: 'Evaluation', icon: <Star />, path: '/evaluation' },
+    { text: 'Dashboard', icon: <LayoutDashboard {...iconProps} />, path: '/dashboard' },
+    { text: 'Complaints', icon: <FileWarning {...iconProps} />, path: '/complaints' },
+    { text: 'Analytics', icon: <BarChart3 {...iconProps} />, path: '/analytics' },
+    { text: 'Evaluation', icon: <Star {...iconProps} />, path: '/evaluation' },
   ];
 
   const adminMenu = [
     ...officialMenu,
-    { text: 'User Management', icon: <People />, path: '/users' },
+    { text: 'User Management', icon: <Users {...iconProps} />, path: '/users' },
   ];
 
   const menuItems = user?.role === 'citizen' ? citizenMenu : user?.role === 'admin' ? adminMenu : officialMenu;
@@ -201,7 +204,7 @@ const Layout: React.FC = () => {
       }}>
         <Toolbar>
           <IconButton color="inherit" edge="start" onClick={() => setMobileOpen(!mobileOpen)} sx={{ mr: 2, display: { md: 'none' } }}>
-            <MenuIcon />
+            <MenuIcon size={22} strokeWidth={1.75} />
           </IconButton>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexGrow: 1 }}>
@@ -292,13 +295,13 @@ const Layout: React.FC = () => {
             </MenuItem>
             <Divider />
             <MenuItem onClick={() => { setAnchorEl(null); navigate('/profile'); }}>
-              <Person sx={{ mr: 1.5, fontSize: 20 }} /> Profile
+              <User size={18} strokeWidth={1.75} style={{ marginRight: 12 }} /> Profile
             </MenuItem>
             <MenuItem
               onClick={() => { setAnchorEl(null); logout(); navigate('/login'); }}
               sx={{ color: nairobiColors.maroon.main }}
             >
-              <Logout sx={{ mr: 1.5, fontSize: 20 }} /> Logout
+              <LogOut size={18} strokeWidth={1.75} style={{ marginRight: 12 }} /> Logout
             </MenuItem>
           </Menu>
         </Toolbar>
@@ -342,7 +345,17 @@ const Layout: React.FC = () => {
         minHeight: '100vh',
       }}>
         <Toolbar />
-        <Outlet />
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+          >
+            <Outlet />
+          </motion.div>
+        </AnimatePresence>
       </Box>
     </Box>
   );

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Box, Container, Paper, Typography } from '@mui/material';
+import { Box, Container, Paper, Typography, alpha } from '@mui/material';
+import { motion } from 'framer-motion';
 import NairobiCoatOfArms from './NairobiCoatOfArms';
 import { nairobiColors } from '../theme/nairobiTheme';
 
@@ -32,19 +33,30 @@ const AuthShell: React.FC<AuthShellProps> = ({ title, subtitle, children, maxWid
 
     <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', py: 6 }}>
       <Container maxWidth={maxWidth}>
-        <Paper variant="outlined" sx={{ p: { xs: 3, sm: 4 }, borderRadius: 2 }}>
-          <Box sx={{ textAlign: 'center', mb: 3 }}>
-            <Typography variant="h5" fontWeight={700} sx={{ color: nairobiColors.green.dark }}>
-              {title}
-            </Typography>
-            {subtitle && (
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                {subtitle}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: 'easeOut' }}
+        >
+          <Paper sx={{
+            p: { xs: 3, sm: 4 },
+            borderRadius: 2,
+            border: `1px solid ${alpha(nairobiColors.green.main, 0.08)}`,
+            boxShadow: `0 4px 20px ${alpha('#000', 0.06)}`,
+          }}>
+            <Box sx={{ textAlign: 'center', mb: 3 }}>
+              <Typography variant="h5" fontWeight={700} sx={{ color: nairobiColors.green.dark }}>
+                {title}
               </Typography>
-            )}
-          </Box>
-          {children}
-        </Paper>
+              {subtitle && (
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                  {subtitle}
+                </Typography>
+              )}
+            </Box>
+            {children}
+          </Paper>
+        </motion.div>
       </Container>
     </Box>
   </Box>

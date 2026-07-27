@@ -3,46 +3,47 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import {
   Box, Container, Typography, Button, Grid, Paper, Chip, alpha, Fade,
 } from '@mui/material';
+import { motion } from 'framer-motion';
 import {
-  Description, Assessment, CheckCircle, Star, WaterDrop, AddRoad,
-  DeleteSweep, Security, MedicalServices, Forest, Apartment, School,
-  Psychology, GpsFixed, BarChart, ArrowForward,
-} from '@mui/icons-material';
+  FileText, Radar, CheckCircle2, Star, Droplet, Construction,
+  Trash2, Shield, Stethoscope, TreePine, Building2, GraduationCap,
+  Brain, LocateFixed, BarChart3, ArrowRight, LucideIcon,
+} from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import NairobiCoatOfArms from '../components/NairobiCoatOfArms';
 import { nairobiColors } from '../theme/nairobiTheme';
 
-const STEPS = [
-  { icon: <Description />, title: '1. Submit', desc: 'Capture details and photos of the issue through our simple e-form.' },
-  { icon: <Assessment />, title: '2. Track', desc: 'Get a unique tracking ID and watch the status change in real-time.' },
-  { icon: <CheckCircle />, title: '3. Resolve', desc: 'County officials address the issue and upload proof of work.' },
-  { icon: <Star />, title: '4. Rate', desc: 'Share your feedback to help us maintain service quality standards.' },
+const STEPS: { icon: LucideIcon; title: string; desc: string }[] = [
+  { icon: FileText, title: '1. Submit', desc: 'Capture details and photos of the issue through our simple e-form.' },
+  { icon: Radar, title: '2. Track', desc: 'Get a unique tracking ID and watch the status change in real-time.' },
+  { icon: CheckCircle2, title: '3. Resolve', desc: 'County officials address the issue and upload proof of work.' },
+  { icon: Star, title: '4. Rate', desc: 'Share your feedback to help us maintain service quality standards.' },
 ];
 
-const CATEGORIES = [
-  { icon: <WaterDrop />, label: 'Water & Sewerage' },
-  { icon: <AddRoad />, label: 'Roads' },
-  { icon: <DeleteSweep />, label: 'Waste' },
-  { icon: <Security />, label: 'Security' },
-  { icon: <MedicalServices />, label: 'Health' },
-  { icon: <Forest />, label: 'Environment' },
-  { icon: <Apartment />, label: 'Housing' },
-  { icon: <School />, label: 'Education' },
+const CATEGORIES: { icon: LucideIcon; label: string }[] = [
+  { icon: Droplet, label: 'Water & Sewerage' },
+  { icon: Construction, label: 'Roads' },
+  { icon: Trash2, label: 'Waste' },
+  { icon: Shield, label: 'Security' },
+  { icon: Stethoscope, label: 'Health' },
+  { icon: TreePine, label: 'Environment' },
+  { icon: Building2, label: 'Housing' },
+  { icon: GraduationCap, label: 'Education' },
 ];
 
-const FEATURES = [
+const FEATURES: { icon: LucideIcon; title: string; desc: string }[] = [
   {
-    icon: <Psychology />,
+    icon: Brain,
     title: 'AI-Powered Categories',
     desc: 'Smart routing ensures your report reaches the specific department responsible for immediate action.',
   },
   {
-    icon: <GpsFixed />,
+    icon: LocateFixed,
     title: 'Real-Time Tracking',
     desc: 'Watch every stage of the resolution process from assessment to final verification.',
   },
   {
-    icon: <BarChart />,
+    icon: BarChart3,
     title: 'Ward-Level Analytics',
     desc: 'Transparent dashboards showing performance metrics across all 85 wards of Nairobi.',
   },
@@ -173,7 +174,7 @@ const LandingPage: React.FC = () => {
               </Typography>
               <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexDirection: { xs: 'column', sm: 'row' }, alignItems: 'center' }}>
                 <Button
-                  variant="contained" size="large" endIcon={<ArrowForward />}
+                  variant="contained" size="large" endIcon={<ArrowRight size={19} strokeWidth={2} />}
                   onClick={() => navigate('/register')}
                   sx={{
                     px: 4, py: 1.6, borderRadius: 2.5, fontWeight: 700, fontSize: '1rem',
@@ -206,35 +207,43 @@ const LandingPage: React.FC = () => {
         <Container maxWidth="lg">
           <SectionHeading title="How It Works" subtitle="From report to resolution in four simple steps" />
           <Grid container spacing={3}>
-            {STEPS.map((step) => (
+            {STEPS.map((step, i) => (
               <Grid item xs={12} sm={6} md={3} key={step.title}>
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 3.5, height: '100%', borderRadius: 3,
-                    border: `1px solid ${alpha(nairobiColors.green.main, 0.1)}`,
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: `0 12px 28px ${alpha(nairobiColors.green.main, 0.12)}`,
-                      borderColor: alpha(nairobiColors.green.main, 0.2),
-                    },
-                  }}
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-40px' }}
+                  transition={{ duration: 0.4, delay: i * 0.08, ease: 'easeOut' }}
+                  style={{ height: '100%' }}
                 >
-                  <Box sx={{
-                    width: 52, height: 52, borderRadius: '50%',
-                    bgcolor: alpha(nairobiColors.green.main, 0.1),
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2,
-                  }}>
-                    {React.cloneElement(step.icon, { sx: { color: nairobiColors.green.main, fontSize: 26 } })}
-                  </Box>
-                  <Typography variant="subtitle1" fontWeight={700} sx={{ color: nairobiColors.green.dark, mb: 1 }}>
-                    {step.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {step.desc}
-                  </Typography>
-                </Paper>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 3.5, height: '100%', borderRadius: 3,
+                      border: `1px solid ${alpha(nairobiColors.green.main, 0.1)}`,
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: `0 12px 28px ${alpha(nairobiColors.green.main, 0.12)}`,
+                        borderColor: alpha(nairobiColors.green.main, 0.2),
+                      },
+                    }}
+                  >
+                    <Box sx={{
+                      width: 52, height: 52, borderRadius: '50%',
+                      bgcolor: alpha(nairobiColors.green.main, 0.1),
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2,
+                    }}>
+                      <step.icon size={26} color={nairobiColors.green.main} strokeWidth={1.75} />
+                    </Box>
+                    <Typography variant="subtitle1" fontWeight={700} sx={{ color: nairobiColors.green.dark, mb: 1 }}>
+                      {step.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {step.desc}
+                    </Typography>
+                  </Paper>
+                </motion.div>
               </Grid>
             ))}
           </Grid>
@@ -253,39 +262,49 @@ const LandingPage: React.FC = () => {
         <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
           <SectionHeading title="Report by Category" subtitle="Select a sector to start your report" />
           <Grid container spacing={2}>
-            {CATEGORIES.map((cat) => (
+            {CATEGORIES.map((cat, i) => (
               <Grid item xs={6} sm={4} md={3} key={cat.label}>
-                <Paper
-                  elevation={0}
-                  onClick={() => navigate('/login')}
-                  sx={{
-                    p: 3, borderRadius: 3, textAlign: 'center', cursor: 'pointer',
-                    border: `1px solid ${alpha(nairobiColors.green.main, 0.1)}`,
-                    transition: 'all 0.25s ease',
-                    '&:hover': {
-                      bgcolor: nairobiColors.green.main,
-                      borderColor: nairobiColors.green.main,
-                      transform: 'translateY(-3px)',
-                      boxShadow: `0 10px 24px ${alpha(nairobiColors.green.main, 0.25)}`,
-                      '& .cat-icon': { color: '#fff' },
-                      '& .cat-label': { color: '#fff' },
-                    },
-                  }}
+                <motion.div
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-40px' }}
+                  transition={{ duration: 0.35, delay: i * 0.05, ease: 'easeOut' }}
                 >
-                  {React.cloneElement(cat.icon, {
-                    className: 'cat-icon',
-                    sx: { fontSize: 34, color: nairobiColors.green.main, mb: 1, transition: 'color 0.25s' },
-                  })}
-                  <Typography
-                    className="cat-label" variant="caption"
+                  <Paper
+                    elevation={0}
+                    onClick={() => navigate('/login')}
                     sx={{
-                      display: 'block', fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase',
-                      fontSize: '0.7rem', color: 'text.primary', transition: 'color 0.25s',
+                      p: 3, borderRadius: 3, textAlign: 'center', cursor: 'pointer',
+                      border: `1px solid ${alpha(nairobiColors.green.main, 0.1)}`,
+                      transition: 'all 0.25s ease',
+                      '&:hover': {
+                        bgcolor: nairobiColors.green.main,
+                        borderColor: nairobiColors.green.main,
+                        transform: 'translateY(-3px)',
+                        boxShadow: `0 10px 24px ${alpha(nairobiColors.green.main, 0.25)}`,
+                        '& .cat-icon': { color: '#fff' },
+                        '& .cat-label': { color: '#fff' },
+                      },
                     }}
                   >
-                    {cat.label}
-                  </Typography>
-                </Paper>
+                    <cat.icon
+                      className="cat-icon"
+                      size={30}
+                      color={nairobiColors.green.main}
+                      strokeWidth={1.75}
+                      style={{ marginBottom: 8, transition: 'color 0.25s' }}
+                    />
+                    <Typography
+                      className="cat-label" variant="caption"
+                      sx={{
+                        display: 'block', fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase',
+                        fontSize: '0.7rem', color: 'text.primary', transition: 'color 0.25s',
+                      }}
+                    >
+                      {cat.label}
+                    </Typography>
+                  </Paper>
+                </motion.div>
               </Grid>
             ))}
           </Grid>
@@ -296,17 +315,24 @@ const LandingPage: React.FC = () => {
       <Box sx={{ py: { xs: 7, md: 10 }, bgcolor: '#F5F7F4' }}>
         <Container maxWidth="lg">
           <Grid container spacing={4}>
-            {FEATURES.map((f) => (
+            {FEATURES.map((f, i) => (
               <Grid item xs={12} md={4} key={f.title}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                  {React.cloneElement(f.icon, { sx: { fontSize: 32, color: nairobiColors.gold.dark } })}
-                  <Typography variant="subtitle1" fontWeight={700} sx={{ color: nairobiColors.green.dark }}>
-                    {f.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {f.desc}
-                  </Typography>
-                </Box>
+                <motion.div
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-40px' }}
+                  transition={{ duration: 0.35, delay: i * 0.08, ease: 'easeOut' }}
+                >
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                    <f.icon size={30} color={nairobiColors.gold.dark} strokeWidth={1.75} />
+                    <Typography variant="subtitle1" fontWeight={700} sx={{ color: nairobiColors.green.dark }}>
+                      {f.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {f.desc}
+                    </Typography>
+                  </Box>
+                </motion.div>
               </Grid>
             ))}
           </Grid>

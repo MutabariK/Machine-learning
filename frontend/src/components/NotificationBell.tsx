@@ -2,10 +2,11 @@ import React, { useEffect, useState, useCallback } from 'react';
 import {
   IconButton, Badge, Menu, MenuItem, Typography, Box, Divider, Button, Tooltip, alpha,
 } from '@mui/material';
-import { Notifications as NotificationsIcon } from '@mui/icons-material';
+import { Bell } from 'lucide-react';
 import { notificationsAPI } from '../services/api';
 import { Notification } from '../types';
 import { nairobiColors } from '../theme/nairobiTheme';
+import EmptyState from './EmptyState';
 
 const POLL_INTERVAL_MS = 60000;
 
@@ -79,7 +80,7 @@ const NotificationBell: React.FC = () => {
       <Tooltip title="Notifications">
         <IconButton color="inherit" onClick={handleOpen}>
           <Badge badgeContent={unreadCount} color="error">
-            <NotificationsIcon />
+            <Bell size={22} strokeWidth={1.75} />
           </Badge>
         </IconButton>
       </Tooltip>
@@ -99,9 +100,9 @@ const NotificationBell: React.FC = () => {
         </Box>
         <Divider />
         {notifications.length === 0 ? (
-          <MenuItem disabled sx={{ opacity: 1, justifyContent: 'center', py: 3 }}>
-            <Typography variant="body2" color="text.secondary">No notifications yet.</Typography>
-          </MenuItem>
+          <Box sx={{ px: 1 }}>
+            <EmptyState icon={Bell} title="No notifications yet" compact />
+          </Box>
         ) : (
           notifications.slice(0, 20).map((n) => (
             <MenuItem

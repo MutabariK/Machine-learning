@@ -4,7 +4,7 @@ import {
   Box, TextField, Button, Typography, Alert, Link,
   InputAdornment, IconButton,
 } from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { Eye, EyeOff } from 'lucide-react';
 import { authAPI } from '../services/api';
 import AuthShell from '../components/AuthShell';
 import { nairobiColors } from '../theme/nairobiTheme';
@@ -66,7 +66,7 @@ const RegisterPage: React.FC = () => {
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" size="small">
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                  {showPassword ? <EyeOff size={19} strokeWidth={1.75} /> : <Eye size={19} strokeWidth={1.75} />}
                 </IconButton>
               </InputAdornment>
             ),
