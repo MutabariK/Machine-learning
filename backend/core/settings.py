@@ -145,6 +145,20 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 if 'test' in sys.argv:
     MEDIA_ROOT = os.path.join(BASE_DIR, 'test_media')
 
+# Render's (and most PaaS) web service filesystem is ephemeral — anything
+# written to MEDIA_ROOT is wiped on every restart/redeploy. Set these three
+# env vars to persist uploaded complaint photos/avatars to Cloudinary's free
+# tier instead; local dev is untouched when they're unset.
+CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME', '')
+if CLOUDINARY_CLOUD_NAME:
+    INSTALLED_APPS += ['cloudinary_storage', 'cloudinary']
+    CLOUDINARY_STORAGE = {
+        'CLOUD_NAME': CLOUDINARY_CLOUD_NAME,
+        'API_KEY': os.environ.get('CLOUDINARY_API_KEY', ''),
+        'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', ''),
+    }
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MAX_UPLOAD_SIZE = 5 * 1024 * 1024  # 5MB
@@ -163,6 +177,10 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@nairobi-platform.local')
 
 if not DEBUG:
+    # Render (and most PaaS hosts) terminate TLS at a proxy and forward plain
+    # HTTP internally. Without this, request.is_secure() is always False and
+    # SECURE_SSL_REDIRECT below causes an infinite redirect loop.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_SSL_REDIRECT = True
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
