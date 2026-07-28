@@ -26,7 +26,7 @@ const AuthShell: React.FC<AuthShellProps> = ({ title, subtitle, children, maxWid
           <NairobiCoatOfArms size={32} />
         </Box>
         <Typography variant="h6" fontWeight={800} sx={{ color: '#fff' }}>
-          Nairobi County
+          JichoMtaani
         </Typography>
       </Box>
     </Box>

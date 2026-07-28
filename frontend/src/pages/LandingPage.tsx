@@ -94,7 +94,7 @@ const LandingPage: React.FC = () => {
             <NairobiCoatOfArms size={22} />
           </Box>
           <Typography variant="h6" fontWeight={800} sx={{ color: nairobiColors.green.dark }}>
-            Nairobi County
+            JichoMtaani
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 3 } }}>
@@ -353,7 +353,7 @@ const LandingPage: React.FC = () => {
                   <NairobiCoatOfArms size={24} />
                 </Box>
                 <Typography variant="h6" fontWeight={700} sx={{ color: nairobiColors.gold.light }}>
-                  Nairobi City County
+                  JichoMtaani
                 </Typography>
               </Box>
               <Typography variant="body2" sx={{ color: alpha('#fff', 0.8), maxWidth: 360 }}>
@@ -389,7 +389,7 @@ const LandingPage: React.FC = () => {
           </Grid>
           <Box sx={{ borderTop: `1px solid ${alpha('#fff', 0.15)}`, mt: 5, pt: 3, textAlign: 'center' }}>
             <Typography variant="caption" sx={{ color: alpha('#fff', 0.6) }}>
-              © {new Date().getFullYear()} Nairobi City County. All Rights Reserved.
+              © {new Date().getFullYear()} JichoMtaani. All Rights Reserved.
             </Typography>
           </Box>
         </Container>

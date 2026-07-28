@@ -104,7 +104,7 @@ const Layout: React.FC = () => {
           letterSpacing: 1.5,
           fontSize: '0.85rem',
         }}>
-          NAIROBI COUNTY
+          JICHOMTAANI
         </Typography>
         <Typography variant="caption" sx={{
           color: alpha('#fff', 0.6),
@@ -223,7 +223,7 @@ const Layout: React.FC = () => {
             </Box>
             <Box>
               <Typography variant="h6" noWrap sx={{ fontWeight: 800, lineHeight: 1.2, letterSpacing: 0.5 }}>
-                Nairobi County Services
+                JichoMtaani
               </Typography>
               <Typography variant="caption" noWrap sx={{
                 color: nairobiColors.gold.light,
