@@ -40,7 +40,7 @@ services:
     staticPublishPath: build
     envVars:
       - key: REACT_APP_API_URL
-        value: "https://nairobi-backend-0ix8.onrender.com"
+        value: "https://nairobi-backend-jw2y.onrender.com"
     routes:
       - type: rewrite
         source: /*
