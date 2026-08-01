@@ -194,6 +194,16 @@ const nairobiTheme = createTheme({
         },
       },
     },
+    MuiCssBaseline: {
+      styleOverrides: {
+        // Wide content (tables, dense grids) must scroll within its own
+        // container, not stretch the page — otherwise the fixed AppBar
+        // stretches to match on mobile, since it's width:100% of the
+        // document's layout viewport rather than the visual viewport.
+        html: { overflowX: 'hidden' },
+        body: { overflowX: 'hidden' },
+      },
+    },
   },
 });
 
