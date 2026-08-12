@@ -10,6 +10,27 @@ from .models import EvaluationResponse
 from .serializers import EvaluationResponseSerializer, EvaluationSubmitSerializer
 
 
+def cronbach_alpha(item_matrix):
+    """Cronbach's alpha for a construct's items.
+
+    item_matrix: 2D array-like, one row per respondent, one column per item.
+    Returns None when there's too little data to compute a meaningful value
+    (fewer than 2 respondents, or zero variance in total scores).
+    """
+    item_matrix = np.array(item_matrix, dtype=float)
+    n_items = item_matrix.shape[1]
+    n_respondents = item_matrix.shape[0]
+    if n_items < 2 or n_respondents < 2:
+        return None
+    item_variances = item_matrix.var(axis=0, ddof=1)
+    total_scores = item_matrix.sum(axis=1)
+    total_variance = total_scores.var(ddof=1)
+    if total_variance == 0:
+        return None
+    alpha = (n_items / (n_items - 1)) * (1 - (item_variances.sum() / total_variance))
+    return round(float(alpha), 3)
+
+
 class EvaluationCreateView(generics.CreateAPIView):
     serializer_class = EvaluationSubmitSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -48,46 +69,20 @@ class EvaluationAnalyticsView(APIView):
         if not responses.exists():
             return Response({
                 'total_responses': 0,
-                'sus': {}, 'tam': {}, 'demographics': {},
+                'tam': {}, 'demographics': {},
             })
 
         all_responses = list(responses)
         n = len(all_responses)
 
-        # --- SUS Analysis ---
-        sus_scores = [r.sus_score for r in all_responses]
-        avg_sus = round(float(np.mean(sus_scores)), 2)
-        median_sus = round(float(np.median(sus_scores)), 2)
-
-        if avg_sus >= 80.3:
-            grade = 'A'
-        elif avg_sus >= 68:
-            grade = 'B'
-        elif avg_sus >= 51:
-            grade = 'C'
-        else:
-            grade = 'D'
-
-        acceptability = 'Acceptable' if avg_sus >= 70 else ('Marginal' if avg_sus >= 50 else 'Not Acceptable')
-
-        sus_questions = [
-            "Would use frequently", "Unnecessarily complex", "Easy to use",
-            "Need technical support", "Well integrated", "Too much inconsistency",
-            "Easy to learn", "Cumbersome to use", "Felt confident", "Needed to learn a lot",
-        ]
-        sus_q_avgs = {}
-        for i in range(1, 11):
-            vals = [getattr(r, f'sus_{i}') for r in all_responses]
-            sus_q_avgs[sus_questions[i - 1]] = round(float(np.mean(vals)), 2)
-
-        score_distribution = []
-        for label, low, high in [('0-20', 0, 20), ('21-40', 21, 40), ('41-60', 41, 60), ('61-80', 61, 80), ('81-100', 81, 100)]:
-            score_distribution.append({'range': label, 'count': sum(1 for s in sus_scores if low <= s <= high)})
-
         # --- TAM Analysis ---
         pu_scores = [r.tam_perceived_usefulness for r in all_responses]
         peou_scores = [r.tam_perceived_ease_of_use for r in all_responses]
         bi_scores = [r.tam_behavioral_intention for r in all_responses]
+
+        pu_matrix = [[getattr(r, f'pu_{i}') for i in range(1, 7)] for r in all_responses]
+        peou_matrix = [[getattr(r, f'peou_{i}') for i in range(1, 7)] for r in all_responses]
+        bi_matrix = [[getattr(r, f'bi_{i}') for i in range(1, 4)] for r in all_responses]
 
         pu_labels = [
             "Improves ability to report issues", "Easier to track resolution",
@@ -131,31 +126,23 @@ class EvaluationAnalyticsView(APIView):
 
         return Response({
             'total_responses': n,
-            'sus': {
-                'average_score': avg_sus,
-                'median_score': median_sus,
-                'min_score': round(float(min(sus_scores)), 2),
-                'max_score': round(float(max(sus_scores)), 2),
-                'std_dev': round(float(np.std(sus_scores)), 2),
-                'grade': grade,
-                'acceptability': acceptability,
-                'question_averages': sus_q_avgs,
-                'score_distribution': score_distribution,
-            },
             'tam': {
                 'perceived_usefulness': {
                     'mean': round(float(np.mean(pu_scores)), 2),
                     'std_dev': round(float(np.std(pu_scores)), 2),
+                    'cronbach_alpha': cronbach_alpha(pu_matrix),
                     'item_averages': compute_item_avgs('pu', pu_labels, 6),
                 },
                 'perceived_ease_of_use': {
                     'mean': round(float(np.mean(peou_scores)), 2),
                     'std_dev': round(float(np.std(peou_scores)), 2),
+                    'cronbach_alpha': cronbach_alpha(peou_matrix),
                     'item_averages': compute_item_avgs('peou', peou_labels, 6),
                 },
                 'behavioral_intention': {
                     'mean': round(float(np.mean(bi_scores)), 2),
                     'std_dev': round(float(np.std(bi_scores)), 2),
+                    'cronbach_alpha': cronbach_alpha(bi_matrix),
                     'item_averages': compute_item_avgs('bi', bi_labels, 3),
                 },
             },
@@ -176,8 +163,7 @@ class EvaluationExportView(APIView):
         responses = EvaluationResponse.objects.select_related('user').all()
 
         likert_fields = (
-            [f'sus_{i}' for i in range(1, 11)]
-            + [f'pu_{i}' for i in range(1, 7)]
+            [f'pu_{i}' for i in range(1, 7)]
             + [f'peou_{i}' for i in range(1, 7)]
             + [f'bi_{i}' for i in range(1, 4)]
         )
@@ -196,7 +182,6 @@ class EvaluationExportView(APIView):
             }
             for field in likert_fields:
                 row[field.upper()] = getattr(r, field)
-            row['SUS Score'] = r.sus_score
             row['TAM Perceived Usefulness'] = r.tam_perceived_usefulness
             row['TAM Perceived Ease of Use'] = r.tam_perceived_ease_of_use
             row['TAM Behavioral Intention'] = r.tam_behavioral_intention
@@ -211,7 +196,6 @@ class EvaluationExportView(APIView):
             if rows:
                 summary = pd.DataFrame([
                     {'Metric': 'Total Responses', 'Value': len(rows)},
-                    {'Metric': 'Average SUS Score', 'Value': round(float(np.mean([r.sus_score for r in responses])), 2)},
                     {'Metric': 'Average Perceived Usefulness', 'Value': round(float(np.mean([r.tam_perceived_usefulness for r in responses])), 2)},
                     {'Metric': 'Average Perceived Ease of Use', 'Value': round(float(np.mean([r.tam_perceived_ease_of_use for r in responses])), 2)},
                     {'Metric': 'Average Behavioral Intention', 'Value': round(float(np.mean([r.tam_behavioral_intention for r in responses])), 2)},

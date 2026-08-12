@@ -44,18 +44,6 @@ class EvaluationResponse(models.Model):
     reported_issue_before = models.BooleanField()
     county_of_residence = models.CharField(max_length=100)
 
-    # SUS (System Usability Scale) — Brooke, 1986
-    sus_1 = models.IntegerField(validators=LIKERT, help_text="I think that I would like to use this system frequently")
-    sus_2 = models.IntegerField(validators=LIKERT, help_text="I found the system unnecessarily complex")
-    sus_3 = models.IntegerField(validators=LIKERT, help_text="I thought the system was easy to use")
-    sus_4 = models.IntegerField(validators=LIKERT, help_text="I think that I would need the support of a technical person to use this system")
-    sus_5 = models.IntegerField(validators=LIKERT, help_text="I found the various functions in this system were well integrated")
-    sus_6 = models.IntegerField(validators=LIKERT, help_text="I thought there was too much inconsistency in this system")
-    sus_7 = models.IntegerField(validators=LIKERT, help_text="I would imagine that most people would learn to use this system very quickly")
-    sus_8 = models.IntegerField(validators=LIKERT, help_text="I found the system very cumbersome to use")
-    sus_9 = models.IntegerField(validators=LIKERT, help_text="I felt very confident using the system")
-    sus_10 = models.IntegerField(validators=LIKERT, help_text="I needed to learn a lot of things before I could get going with this system")
-
     # TAM — Perceived Usefulness (Davis, 1989)
     pu_1 = models.IntegerField(validators=LIKERT, help_text="Using this system improves my ability to report public service issues")
     pu_2 = models.IntegerField(validators=LIKERT, help_text="Using this system makes it easier to track complaint resolution")
@@ -84,12 +72,6 @@ class EvaluationResponse(models.Model):
         ordering = ['-created_at']
 
     @property
-    def sus_score(self):
-        odd = (self.sus_1 - 1) + (self.sus_3 - 1) + (self.sus_5 - 1) + (self.sus_7 - 1) + (self.sus_9 - 1)
-        even = (5 - self.sus_2) + (5 - self.sus_4) + (5 - self.sus_6) + (5 - self.sus_8) + (5 - self.sus_10)
-        return (odd + even) * 2.5
-
-    @property
     def tam_perceived_usefulness(self):
         return round((self.pu_1 + self.pu_2 + self.pu_3 + self.pu_4 + self.pu_5 + self.pu_6) / 6, 2)
 
@@ -102,4 +84,4 @@ class EvaluationResponse(models.Model):
         return round((self.bi_1 + self.bi_2 + self.bi_3) / 3, 2)
 
     def __str__(self):
-        return f"Evaluation by {self.user.full_name} — SUS: {self.sus_score}"
+        return f"Evaluation by {self.user.full_name} — PU: {self.tam_perceived_usefulness}"

@@ -3,6 +3,7 @@ from rest_framework.test import APIClient
 from rest_framework import status
 from users.models import User
 from evaluation.models import EvaluationResponse
+from evaluation.views import cronbach_alpha
 
 
 def build_evaluation_payload():
@@ -14,8 +15,6 @@ def build_evaluation_payload():
         'reported_issue_before': True,
         'county_of_residence': 'Nairobi',
     }
-    for i in range(1, 11):
-        payload[f'sus_{i}'] = 4
     for i in range(1, 7):
         payload[f'pu_{i}'] = 4
         payload[f'peou_{i}'] = 4
@@ -53,13 +52,14 @@ class EvaluationSubmitTest(TestCase):
         response = self.client.get('/api/evaluation/check/')
         self.assertTrue(response.data['has_submitted'])
 
-    def test_sus_score_calculation(self):
+    def test_tam_construct_scores(self):
         self.client.force_authenticate(user=self.citizen)
         self.client.post('/api/evaluation/submit/', build_evaluation_payload(), format='json')
         evaluation = EvaluationResponse.objects.get(user=self.citizen)
-        # All Likert answers are 4: odd items contribute (4-1)=3 each (x5),
-        # even items contribute (5-4)=1 each (x5) -> (15+5)*2.5 = 50.0
-        self.assertEqual(evaluation.sus_score, 50.0)
+        # All Likert answers are 4, so every construct mean is 4.0
+        self.assertEqual(evaluation.tam_perceived_usefulness, 4.0)
+        self.assertEqual(evaluation.tam_perceived_ease_of_use, 4.0)
+        self.assertEqual(evaluation.tam_behavioral_intention, 4.0)
 
 
 class EvaluationOfficialTest(TestCase):
@@ -89,8 +89,12 @@ class EvaluationOfficialTest(TestCase):
         response = self.client.get('/api/evaluation/analytics/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['total_responses'], 1)
-        self.assertIn('sus', response.data)
+        self.assertNotIn('sus', response.data)
         self.assertIn('tam', response.data)
+        self.assertIn('cronbach_alpha', response.data['tam']['perceived_usefulness'])
+        # Cronbach's alpha is undefined with a single respondent (no variance
+        # to compute) -- the view returns None rather than a bogus number.
+        self.assertIsNone(response.data['tam']['perceived_usefulness']['cronbach_alpha'])
 
     def test_official_export_excel(self):
         self.client.force_authenticate(user=self.official)
@@ -105,3 +109,44 @@ class EvaluationOfficialTest(TestCase):
         self.client.force_authenticate(user=self.citizen)
         response = self.client.get('/api/evaluation/export/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class CronbachAlphaTest(TestCase):
+    def test_perfectly_correlated_items_give_alpha_one(self):
+        # Two items that move in lockstep across respondents are maximally
+        # internally consistent -- hand-verified expected alpha is exactly 1.0.
+        matrix = [[1, 1], [2, 2], [3, 3], [4, 4]]
+        self.assertEqual(cronbach_alpha(matrix), 1.0)
+
+    def test_single_respondent_returns_none(self):
+        # No variance can be computed from one respondent -- must not raise
+        # or return a misleading number.
+        self.assertIsNone(cronbach_alpha([[3, 4, 5]]))
+
+    def test_analytics_computes_real_alpha_with_varied_responses(self):
+        client = APIClient()
+        official = User.objects.create_user(
+            email='official2@example.com', full_name='Official', password='official123', role='official'
+        )
+        varied_pu_answers = [
+            [5, 5, 4, 5, 4, 5],
+            [3, 4, 3, 4, 3, 4],
+            [1, 2, 2, 1, 2, 1],
+            [4, 4, 5, 4, 5, 4],
+        ]
+        for i, pu_answers in enumerate(varied_pu_answers):
+            citizen = User.objects.create_user(
+                email=f'citizen{i}@example.com', full_name=f'Citizen {i}', password='pw12345', role='citizen'
+            )
+            payload = build_evaluation_payload()
+            for j, val in enumerate(pu_answers, start=1):
+                payload[f'pu_{j}'] = val
+            client.force_authenticate(user=citizen)
+            client.post('/api/evaluation/submit/', payload, format='json')
+
+        client.force_authenticate(user=official)
+        response = client.get('/api/evaluation/analytics/')
+        alpha = response.data['tam']['perceived_usefulness']['cronbach_alpha']
+        self.assertIsNotNone(alpha)
+        self.assertGreater(alpha, 0)
+        self.assertLessEqual(alpha, 1)

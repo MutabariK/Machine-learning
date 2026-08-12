@@ -9,7 +9,6 @@ class EvaluationSubmitSerializer(serializers.ModelSerializer):
 
 
 class EvaluationResponseSerializer(serializers.ModelSerializer):
-    sus_score = serializers.FloatField(read_only=True)
     tam_perceived_usefulness = serializers.FloatField(read_only=True)
     tam_perceived_ease_of_use = serializers.FloatField(read_only=True)
     tam_behavioral_intention = serializers.FloatField(read_only=True)
@@ -19,12 +18,10 @@ class EvaluationResponseSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'age_range', 'gender', 'education',
             'digital_service_frequency', 'reported_issue_before',
-            'sus_1', 'sus_2', 'sus_3', 'sus_4', 'sus_5',
-            'sus_6', 'sus_7', 'sus_8', 'sus_9', 'sus_10',
             'pu_1', 'pu_2', 'pu_3', 'pu_4', 'pu_5', 'pu_6',
             'peou_1', 'peou_2', 'peou_3', 'peou_4', 'peou_5', 'peou_6',
             'bi_1', 'bi_2', 'bi_3',
-            'sus_score', 'tam_perceived_usefulness',
+            'tam_perceived_usefulness',
             'tam_perceived_ease_of_use', 'tam_behavioral_intention',
             'created_at',
         ]

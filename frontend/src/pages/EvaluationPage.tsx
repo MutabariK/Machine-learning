@@ -14,7 +14,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { evaluationAPI } from '../services/api';
 import StatCard from '../components/StatCard';
 import EmptyState from '../components/EmptyState';
-import { ClipboardList, Star, TrendingUp, ThumbsUp, Users, GraduationCap, Download } from 'lucide-react';
+import { ClipboardList, Star, TrendingUp, ThumbsUp, Users, Download } from 'lucide-react';
 import { nairobiColors } from '../theme/nairobiTheme';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
@@ -25,19 +25,6 @@ const TASKS = [
   { id: 3, text: 'Navigate to "My Complaints" and verify your complaint appears in the list.' },
   { id: 4, text: 'Click the view icon (eye) on your complaint to see its full details.' },
   { id: 5, text: 'Submit a second complaint with Category "Roads" and a title and location of your choice.' },
-];
-
-const SUS_QUESTIONS = [
-  'I think that I would like to use this system frequently.',
-  'I found the system unnecessarily complex.',
-  'I thought the system was easy to use.',
-  'I think that I would need the support of a technical person to be able to use this system.',
-  'I found the various functions in this system were well integrated.',
-  'I thought there was too much inconsistency in this system.',
-  'I would imagine that most people would learn to use this system very quickly.',
-  'I found the system very cumbersome to use.',
-  'I felt very confident using the system.',
-  'I needed to learn a lot of things before I could get going with this system.',
 ];
 
 const TAM_PU = [
@@ -72,7 +59,7 @@ const LIKERT_OPTIONS = [
   { value: 5, label: 'Strongly Agree' },
 ];
 
-const STEPS = ['Task Instructions', 'Demographics', 'System Usability (SUS)', 'Technology Acceptance (TAM)', 'Complete'];
+const STEPS = ['Task Instructions', 'Demographics', 'Technology Acceptance (TAM)', 'Complete'];
 
 interface LikertGroupProps {
   questions: string[];
@@ -104,6 +91,8 @@ const LikertGroup: React.FC<LikertGroupProps> = ({ questions, prefix, values, on
     ))}
   </>
 );
+
+const formatAlpha = (alpha: number | null): string => (alpha === null ? 'N/A (insufficient data)' : alpha.toFixed(3));
 
 const CHART_COLORS = [
   nairobiColors.green.main,
@@ -188,14 +177,6 @@ const EvaluationPage: React.FC = () => {
       }
     }
     if (activeStep === 2) {
-      for (let i = 1; i <= 10; i++) {
-        if (!likertValues[`sus_${i}`]) {
-          setError(`Please answer SUS question ${i}.`);
-          return false;
-        }
-      }
-    }
-    if (activeStep === 3) {
       for (let i = 1; i <= 6; i++) {
         if (!likertValues[`pu_${i}`]) { setError(`Please answer Perceived Usefulness question ${i}.`); return false; }
       }
@@ -211,7 +192,7 @@ const EvaluationPage: React.FC = () => {
 
   const handleNext = () => {
     if (!validateStep()) return;
-    if (activeStep === 3) {
+    if (activeStep === 2) {
       handleSubmit();
     } else {
       setActiveStep(prev => prev + 1);
@@ -229,7 +210,7 @@ const EvaluationPage: React.FC = () => {
       };
       await evaluationAPI.submit(payload);
       setSubmitted(true);
-      setActiveStep(4);
+      setActiveStep(3);
     } catch (err: any) {
       const data = err.response?.data;
       setError(data?.detail || 'Failed to submit evaluation. Please try again.');
@@ -258,7 +239,7 @@ const EvaluationPage: React.FC = () => {
       );
     }
 
-    const { sus, tam, demographics: demo } = analytics;
+    const { tam, demographics: demo } = analytics;
 
     return (
       <Box>
@@ -266,7 +247,7 @@ const EvaluationPage: React.FC = () => {
           <Box>
             <Typography variant="h5" fontWeight={700} gutterBottom sx={{ color: nairobiColors.green.dark }}>Evaluation Results</Typography>
             <Typography variant="body2" color="text.secondary" gutterBottom>
-              SUS (Brooke, 1986) &amp; TAM (Davis, 1989) — {analytics.total_responses} responses
+              TAM (Davis, 1989) — {analytics.total_responses} responses
             </Typography>
           </Box>
           <Button
@@ -281,59 +262,17 @@ const EvaluationPage: React.FC = () => {
         </Box>
 
         <Grid container spacing={3} sx={{ mt: 1 }}>
-          <Grid item xs={6} sm={4} md={2}>
+          <Grid item xs={6} sm={3}>
             <StatCard title="Responses" value={analytics.total_responses} icon={Users} color={nairobiColors.green.main} />
           </Grid>
-          <Grid item xs={6} sm={4} md={2}>
-            <StatCard title="SUS Score" value={sus.average_score} icon={Star} color={nairobiColors.gold.main} />
-          </Grid>
-          <Grid item xs={6} sm={4} md={2}>
-            <StatCard title="SUS Grade" value={sus.grade} icon={GraduationCap} color="#4CAF50" />
-          </Grid>
-          <Grid item xs={6} sm={4} md={2}>
+          <Grid item xs={6} sm={3}>
             <StatCard title="Usefulness" value={`${tam.perceived_usefulness.mean}/5`} icon={ThumbsUp} color="#2196F3" />
           </Grid>
-          <Grid item xs={6} sm={4} md={2}>
+          <Grid item xs={6} sm={3}>
             <StatCard title="Ease of Use" value={`${tam.perceived_ease_of_use.mean}/5`} icon={TrendingUp} color={nairobiColors.maroon.main} />
           </Grid>
-          <Grid item xs={6} sm={4} md={2}>
+          <Grid item xs={6} sm={3}>
             <StatCard title="Intention" value={`${tam.behavioral_intention.mean}/5`} icon={ClipboardList} color={nairobiColors.gold.dark} />
-          </Grid>
-        </Grid>
-
-        {/* SUS Section */}
-        <Typography variant="h6" fontWeight={700} sx={{ mt: 4, mb: 2, color: nairobiColors.green.dark }}>System Usability Scale (SUS)</Typography>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
-            <Paper sx={{ p: 3 }}>
-              <Typography variant="subtitle1" fontWeight={600} gutterBottom>SUS Score Distribution</Typography>
-              <Bar data={{
-                labels: sus.score_distribution.map((s: any) => s.range),
-                datasets: [{ label: 'Responses', data: sus.score_distribution.map((s: any) => s.count), backgroundColor: CHART_COLORS }],
-              }} options={{ responsive: true, plugins: { legend: { display: false } } }} />
-            </Paper>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Paper sx={{ p: 3 }}>
-              <Typography variant="subtitle1" fontWeight={600} gutterBottom>SUS Question Averages</Typography>
-              <Bar data={{
-                labels: Object.keys(sus.question_averages).map((q: string, i: number) => `Q${i + 1}`),
-                datasets: [{ label: 'Average', data: Object.values(sus.question_averages) as number[], backgroundColor: nairobiColors.gold.main }],
-              }} options={{ responsive: true, plugins: { legend: { display: false } }, scales: { y: { max: 5 } } }} />
-            </Paper>
-          </Grid>
-          <Grid item xs={12}>
-            <Paper sx={{ p: 3 }}>
-              <Typography variant="subtitle1" fontWeight={600} gutterBottom>SUS Statistics</Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={4} sm={2}><Typography variant="caption" color="text.secondary">Mean</Typography><Typography fontWeight={600}>{sus.average_score}</Typography></Grid>
-                <Grid item xs={4} sm={2}><Typography variant="caption" color="text.secondary">Median</Typography><Typography fontWeight={600}>{sus.median_score}</Typography></Grid>
-                <Grid item xs={4} sm={2}><Typography variant="caption" color="text.secondary">Std Dev</Typography><Typography fontWeight={600}>{sus.std_dev}</Typography></Grid>
-                <Grid item xs={4} sm={2}><Typography variant="caption" color="text.secondary">Min</Typography><Typography fontWeight={600}>{sus.min_score}</Typography></Grid>
-                <Grid item xs={4} sm={2}><Typography variant="caption" color="text.secondary">Max</Typography><Typography fontWeight={600}>{sus.max_score}</Typography></Grid>
-                <Grid item xs={4} sm={2}><Typography variant="caption" color="text.secondary">Acceptability</Typography><Typography fontWeight={600}>{sus.acceptability}</Typography></Grid>
-              </Grid>
-            </Paper>
           </Grid>
         </Grid>
 
@@ -344,7 +283,8 @@ const EvaluationPage: React.FC = () => {
             <Paper sx={{ p: 3 }}>
               <Typography variant="subtitle1" fontWeight={600} gutterBottom>Perceived Usefulness</Typography>
               <Typography variant="h4" sx={{ color: nairobiColors.green.main }} fontWeight={700}>{tam.perceived_usefulness.mean}/5</Typography>
-              <Typography variant="caption" color="text.secondary">SD: {tam.perceived_usefulness.std_dev}</Typography>
+              <Typography variant="caption" color="text.secondary" display="block">SD: {tam.perceived_usefulness.std_dev}</Typography>
+              <Typography variant="caption" color="text.secondary" display="block">Cronbach's α: {formatAlpha(tam.perceived_usefulness.cronbach_alpha)}</Typography>
               <Divider sx={{ my: 2 }} />
               {Object.entries(tam.perceived_usefulness.item_averages).map(([q, avg]: [string, any]) => (
                 <Box key={q} sx={{ py: 0.5, display: 'flex', justifyContent: 'space-between' }}>
@@ -358,7 +298,8 @@ const EvaluationPage: React.FC = () => {
             <Paper sx={{ p: 3 }}>
               <Typography variant="subtitle1" fontWeight={600} gutterBottom>Perceived Ease of Use</Typography>
               <Typography variant="h4" sx={{ color: '#4CAF50' }} fontWeight={700}>{tam.perceived_ease_of_use.mean}/5</Typography>
-              <Typography variant="caption" color="text.secondary">SD: {tam.perceived_ease_of_use.std_dev}</Typography>
+              <Typography variant="caption" color="text.secondary" display="block">SD: {tam.perceived_ease_of_use.std_dev}</Typography>
+              <Typography variant="caption" color="text.secondary" display="block">Cronbach's α: {formatAlpha(tam.perceived_ease_of_use.cronbach_alpha)}</Typography>
               <Divider sx={{ my: 2 }} />
               {Object.entries(tam.perceived_ease_of_use.item_averages).map(([q, avg]: [string, any]) => (
                 <Box key={q} sx={{ py: 0.5, display: 'flex', justifyContent: 'space-between' }}>
@@ -372,7 +313,8 @@ const EvaluationPage: React.FC = () => {
             <Paper sx={{ p: 3 }}>
               <Typography variant="subtitle1" fontWeight={600} gutterBottom>Behavioral Intention</Typography>
               <Typography variant="h4" sx={{ color: nairobiColors.maroon.main }} fontWeight={700}>{tam.behavioral_intention.mean}/5</Typography>
-              <Typography variant="caption" color="text.secondary">SD: {tam.behavioral_intention.std_dev}</Typography>
+              <Typography variant="caption" color="text.secondary" display="block">SD: {tam.behavioral_intention.std_dev}</Typography>
+              <Typography variant="caption" color="text.secondary" display="block">Cronbach's α: {formatAlpha(tam.behavioral_intention.cronbach_alpha)}</Typography>
               <Divider sx={{ my: 2 }} />
               {Object.entries(tam.behavioral_intention.item_averages).map(([q, avg]: [string, any]) => (
                 <Box key={q} sx={{ py: 0.5, display: 'flex', justifyContent: 'space-between' }}>
@@ -579,21 +521,10 @@ const EvaluationPage: React.FC = () => {
         </Paper>
       )}
 
-      {/* Step 2: SUS */}
+      {/* Step 2: TAM */}
       {activeStep === 2 && (
         <Paper sx={{ p: 4 }}>
-          <Typography variant="h6" fontWeight={600} gutterBottom>Section B: System Usability Scale (SUS)</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Please rate each statement based on your experience using the platform. Select a value from 1 (Strongly Disagree) to 5 (Strongly Agree).
-          </Typography>
-          <LikertGroup questions={SUS_QUESTIONS} prefix="sus" values={likertValues} onChange={handleLikert} />
-        </Paper>
-      )}
-
-      {/* Step 3: TAM */}
-      {activeStep === 3 && (
-        <Paper sx={{ p: 4 }}>
-          <Typography variant="h6" fontWeight={600} gutterBottom>Section C: Technology Acceptance Model (TAM)</Typography>
+          <Typography variant="h6" fontWeight={600} gutterBottom>Section B: Technology Acceptance Model (TAM)</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
             Reference: Davis, F.D. (1989). "Perceived Usefulness, Perceived Ease of Use, and User Acceptance of Information Technology."
           </Typography>
@@ -623,7 +554,7 @@ const EvaluationPage: React.FC = () => {
       )}
 
       {/* Navigation Buttons */}
-      {activeStep < 4 && (
+      {activeStep < 3 && (
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
           <Button
             variant="outlined" disabled={activeStep === 0}
@@ -635,7 +566,7 @@ const EvaluationPage: React.FC = () => {
             variant="contained" onClick={handleNext} disabled={loading}
             sx={{ px: 4 }}
           >
-            {loading ? 'Submitting...' : activeStep === 3 ? 'Submit Evaluation' : 'Next'}
+            {loading ? 'Submitting...' : activeStep === 2 ? 'Submit Evaluation' : 'Next'}
           </Button>
         </Box>
       )}
