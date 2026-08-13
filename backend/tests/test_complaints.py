@@ -104,6 +104,56 @@ class ComplaintTest(TestCase):
         }, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_admin_can_assign_official_in_matching_department(self):
+        admin = User.objects.create_superuser(
+            email='admin2@example.com', full_name='Admin', password='admin12345'
+        )
+        self.official.department = self.category
+        self.official.save()
+        complaint = Complaint.objects.create(
+            citizen=self.citizen, category=self.category, ward=self.ward,
+            title='Test', description='Test', location='Test', status='submitted'
+        )
+        self.client.force_authenticate(user=admin)
+        response = self.client.patch(f'/api/complaints/{complaint.id}/update/', {
+            'assigned_to': self.official.id
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        complaint.refresh_from_db()
+        self.assertEqual(complaint.assigned_to, self.official)
+
+    def test_cannot_assign_official_from_other_department(self):
+        admin = User.objects.create_superuser(
+            email='admin3@example.com', full_name='Admin', password='admin12345'
+        )
+        self.official.department = self.other_category
+        self.official.save()
+        complaint = Complaint.objects.create(
+            citizen=self.citizen, category=self.category, ward=self.ward,
+            title='Test', description='Test', location='Test', status='submitted'
+        )
+        self.client.force_authenticate(user=admin)
+        response = self.client.patch(f'/api/complaints/{complaint.id}/update/', {
+            'assigned_to': self.official.id
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        complaint.refresh_from_db()
+        self.assertIsNone(complaint.assigned_to)
+
+    def test_cannot_assign_complaint_to_a_citizen(self):
+        admin = User.objects.create_superuser(
+            email='admin4@example.com', full_name='Admin', password='admin12345'
+        )
+        complaint = Complaint.objects.create(
+            citizen=self.citizen, category=self.category, ward=self.ward,
+            title='Test', description='Test', location='Test', status='submitted'
+        )
+        self.client.force_authenticate(user=admin)
+        response = self.client.patch(f'/api/complaints/{complaint.id}/update/', {
+            'assigned_to': self.citizen.id
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_citizen_cannot_update_status(self):
         self.client.force_authenticate(user=self.citizen)
         complaint = Complaint.objects.create(

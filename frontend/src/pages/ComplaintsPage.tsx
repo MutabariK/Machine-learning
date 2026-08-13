@@ -127,7 +127,7 @@ const ComplaintsPage: React.FC = () => {
       setMessage('Complaint updated successfully.');
       loadComplaints();
     } catch (err: any) {
-      const detail = err.response?.data?.status?.[0] || err.response?.data?.detail || 'Failed to update complaint.';
+      const detail = err.response?.data?.status?.[0] || err.response?.data?.assigned_to?.[0] || err.response?.data?.detail || 'Failed to update complaint.';
       setError(detail);
     }
   };

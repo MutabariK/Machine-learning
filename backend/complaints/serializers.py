@@ -148,6 +148,20 @@ class ComplaintUpdateSerializer(serializers.ModelSerializer):
                 )
         return value
 
+    def validate_assigned_to(self, value):
+        if value is None:
+            return value
+        if value.role != 'official':
+            raise serializers.ValidationError(
+                'Complaints can only be assigned to county officials.'
+            )
+        category = self.instance.category if self.instance else None
+        if category is not None and value.department_id != category.id:
+            raise serializers.ValidationError(
+                f'{value.full_name} is not in the department responsible for this complaint\'s category.'
+            )
+        return value
+
     def update(self, instance, validated_data):
         from notifications.services import notify_status_change, notify_assignment
 
