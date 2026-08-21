@@ -9,7 +9,7 @@ services:
   - type: web
     name: nairobi-backend
     runtime: python
-    plan: free
+    plan: starter
     rootDir: backend
     buildCommand: "./build.sh"
     startCommand: "gunicorn core.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 60"
