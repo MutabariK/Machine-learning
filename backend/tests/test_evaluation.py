@@ -88,13 +88,23 @@ class EvaluationOfficialTest(TestCase):
         self.client.force_authenticate(user=self.official)
         response = self.client.get('/api/evaluation/analytics/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['total_responses'], 1)
-        self.assertNotIn('sus', response.data)
-        self.assertIn('tam', response.data)
-        self.assertIn('cronbach_alpha', response.data['tam']['perceived_usefulness'])
+        # The response is segmented by respondent role -- overall pools
+        # everyone, citizen/official_admin isolate each group -- using the
+        # same TAM items throughout, only the population included differs.
+        self.assertIn('overall', response.data)
+        self.assertIn('citizen', response.data)
+        self.assertIn('official_admin', response.data)
+        self.assertEqual(response.data['overall']['total_responses'], 1)
+        self.assertEqual(response.data['citizen']['total_responses'], 1)
+        self.assertEqual(response.data['official_admin']['total_responses'], 0)
+        self.assertNotIn('sus', response.data['overall'])
+        self.assertIn('tam', response.data['overall'])
+        self.assertIn('cronbach_alpha', response.data['overall']['tam']['perceived_usefulness'])
         # Cronbach's alpha is undefined with a single respondent (no variance
         # to compute) -- the view returns None rather than a bogus number.
-        self.assertIsNone(response.data['tam']['perceived_usefulness']['cronbach_alpha'])
+        self.assertIsNone(response.data['overall']['tam']['perceived_usefulness']['cronbach_alpha'])
+        # official_admin has zero respondents -- must degrade gracefully.
+        self.assertEqual(response.data['official_admin']['tam'], {})
 
     def test_official_export_excel(self):
         self.client.force_authenticate(user=self.official)
@@ -146,7 +156,7 @@ class CronbachAlphaTest(TestCase):
 
         client.force_authenticate(user=official)
         response = client.get('/api/evaluation/analytics/')
-        alpha = response.data['tam']['perceived_usefulness']['cronbach_alpha']
+        alpha = response.data['overall']['tam']['perceived_usefulness']['cronbach_alpha']
         self.assertIsNotNone(alpha)
         self.assertGreater(alpha, 0)
         self.assertLessEqual(alpha, 1)

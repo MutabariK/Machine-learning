@@ -61,98 +61,106 @@ class EvaluationListView(generics.ListAPIView):
     permission_classes = [IsOfficial]
 
 
+PU_LABELS = [
+    "Improves ability to carry out tasks", "Easier to track resolution",
+    "Enhances engagement with government", "Useful for monitoring delivery",
+    "Increases productivity", "Overall useful",
+]
+PEOU_LABELS = [
+    "Easy to learn", "Easy to get system to do what I want",
+    "Clear and understandable", "Flexible to interact with",
+    "Easy to become skillful", "Overall easy to use",
+]
+BI_LABELS = [
+    "Intend to continue using", "Would recommend to others",
+    "Plan to use frequently",
+]
+
+
+def _build_segment_stats(responses):
+    """Compute the TAM/demographic breakdown for one set of EvaluationResponse
+    rows. Used to build the overall, citizen-only, and official/admin-only
+    segments from the same underlying items — the questions never change,
+    only which respondents are included.
+    """
+    all_responses = list(responses)
+    n = len(all_responses)
+    if n == 0:
+        return {'total_responses': 0, 'tam': {}, 'demographics': {}}
+
+    pu_scores = [r.tam_perceived_usefulness for r in all_responses]
+    peou_scores = [r.tam_perceived_ease_of_use for r in all_responses]
+    bi_scores = [r.tam_behavioral_intention for r in all_responses]
+
+    pu_matrix = [[getattr(r, f'pu_{i}') for i in range(1, 7)] for r in all_responses]
+    peou_matrix = [[getattr(r, f'peou_{i}') for i in range(1, 7)] for r in all_responses]
+    bi_matrix = [[getattr(r, f'bi_{i}') for i in range(1, 4)] for r in all_responses]
+
+    def compute_item_avgs(prefix, labels, count):
+        result = {}
+        for i in range(1, count + 1):
+            vals = [getattr(r, f'{prefix}_{i}') for r in all_responses]
+            result[labels[i - 1]] = round(float(np.mean(vals)), 2)
+        return result
+
+    def count_field(field):
+        counts = {}
+        for r in all_responses:
+            val = getattr(r, field)
+            display = val
+            for choice_val, choice_label in getattr(EvaluationResponse, field).field.choices:
+                if choice_val == val:
+                    display = choice_label
+                    break
+            counts[display] = counts.get(display, 0) + 1
+        return counts
+
+    reported_counts = {
+        'Yes': sum(1 for r in all_responses if r.reported_issue_before),
+        'No': sum(1 for r in all_responses if not r.reported_issue_before),
+    }
+
+    return {
+        'total_responses': n,
+        'tam': {
+            'perceived_usefulness': {
+                'mean': round(float(np.mean(pu_scores)), 2),
+                'std_dev': round(float(np.std(pu_scores)), 2),
+                'cronbach_alpha': cronbach_alpha(pu_matrix),
+                'item_averages': compute_item_avgs('pu', PU_LABELS, 6),
+            },
+            'perceived_ease_of_use': {
+                'mean': round(float(np.mean(peou_scores)), 2),
+                'std_dev': round(float(np.std(peou_scores)), 2),
+                'cronbach_alpha': cronbach_alpha(peou_matrix),
+                'item_averages': compute_item_avgs('peou', PEOU_LABELS, 6),
+            },
+            'behavioral_intention': {
+                'mean': round(float(np.mean(bi_scores)), 2),
+                'std_dev': round(float(np.std(bi_scores)), 2),
+                'cronbach_alpha': cronbach_alpha(bi_matrix),
+                'item_averages': compute_item_avgs('bi', BI_LABELS, 3),
+            },
+        },
+        'demographics': {
+            'age_range': count_field('age_range'),
+            'gender': count_field('gender'),
+            'education': count_field('education'),
+            'digital_service_frequency': count_field('digital_service_frequency'),
+            'reported_issue_before': reported_counts,
+        },
+    }
+
+
 class EvaluationAnalyticsView(APIView):
     permission_classes = [IsOfficial]
 
     def get(self, request):
-        responses = EvaluationResponse.objects.all()
-        if not responses.exists():
-            return Response({
-                'total_responses': 0,
-                'tam': {}, 'demographics': {},
-            })
-
-        all_responses = list(responses)
-        n = len(all_responses)
-
-        # --- TAM Analysis ---
-        pu_scores = [r.tam_perceived_usefulness for r in all_responses]
-        peou_scores = [r.tam_perceived_ease_of_use for r in all_responses]
-        bi_scores = [r.tam_behavioral_intention for r in all_responses]
-
-        pu_matrix = [[getattr(r, f'pu_{i}') for i in range(1, 7)] for r in all_responses]
-        peou_matrix = [[getattr(r, f'peou_{i}') for i in range(1, 7)] for r in all_responses]
-        bi_matrix = [[getattr(r, f'bi_{i}') for i in range(1, 4)] for r in all_responses]
-
-        pu_labels = [
-            "Improves ability to report issues", "Easier to track resolution",
-            "Enhances engagement with government", "Useful for monitoring delivery",
-            "Increases productivity", "Overall useful",
-        ]
-        peou_labels = [
-            "Easy to learn", "Easy to get system to do what I want",
-            "Clear and understandable", "Flexible to interact with",
-            "Easy to become skillful", "Overall easy to use",
-        ]
-        bi_labels = [
-            "Intend to use for reporting", "Would recommend to others",
-            "Plan to use frequently",
-        ]
-
-        def compute_item_avgs(prefix, labels, count):
-            result = {}
-            for i in range(1, count + 1):
-                vals = [getattr(r, f'{prefix}_{i}') for r in all_responses]
-                result[labels[i - 1]] = round(float(np.mean(vals)), 2)
-            return result
-
-        # --- Demographics ---
-        def count_field(field):
-            counts = {}
-            for r in all_responses:
-                val = getattr(r, field)
-                display = val
-                for choice_val, choice_label in getattr(EvaluationResponse, field).field.choices:
-                    if choice_val == val:
-                        display = choice_label
-                        break
-                counts[display] = counts.get(display, 0) + 1
-            return counts
-
-        reported_counts = {
-            'Yes': sum(1 for r in all_responses if r.reported_issue_before),
-            'No': sum(1 for r in all_responses if not r.reported_issue_before),
-        }
-
+        base = EvaluationResponse.objects.select_related('user').all()
         return Response({
-            'total_responses': n,
-            'tam': {
-                'perceived_usefulness': {
-                    'mean': round(float(np.mean(pu_scores)), 2),
-                    'std_dev': round(float(np.std(pu_scores)), 2),
-                    'cronbach_alpha': cronbach_alpha(pu_matrix),
-                    'item_averages': compute_item_avgs('pu', pu_labels, 6),
-                },
-                'perceived_ease_of_use': {
-                    'mean': round(float(np.mean(peou_scores)), 2),
-                    'std_dev': round(float(np.std(peou_scores)), 2),
-                    'cronbach_alpha': cronbach_alpha(peou_matrix),
-                    'item_averages': compute_item_avgs('peou', peou_labels, 6),
-                },
-                'behavioral_intention': {
-                    'mean': round(float(np.mean(bi_scores)), 2),
-                    'std_dev': round(float(np.std(bi_scores)), 2),
-                    'cronbach_alpha': cronbach_alpha(bi_matrix),
-                    'item_averages': compute_item_avgs('bi', bi_labels, 3),
-                },
-            },
-            'demographics': {
-                'age_range': count_field('age_range'),
-                'gender': count_field('gender'),
-                'education': count_field('education'),
-                'digital_service_frequency': count_field('digital_service_frequency'),
-                'reported_issue_before': reported_counts,
-            },
+            'overall': _build_segment_stats(base),
+            'citizen': _build_segment_stats(base.filter(user__role='citizen')),
+            'official_admin': _build_segment_stats(base.filter(user__role__in=['official', 'admin'])),
         })
 
 

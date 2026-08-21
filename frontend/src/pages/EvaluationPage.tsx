@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Box, Paper, Typography, Button, Stepper, Step, StepLabel, Radio, RadioGroup,
   FormControlLabel, FormControl, FormLabel, TextField, MenuItem, Checkbox,
-  Alert, CircularProgress, Divider, Grid,
+  Alert, CircularProgress, Divider, Grid, Tabs, Tab, ToggleButtonGroup, ToggleButton,
 } from '@mui/material';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import {
@@ -14,12 +14,12 @@ import { useAuth } from '../contexts/AuthContext';
 import { evaluationAPI } from '../services/api';
 import StatCard from '../components/StatCard';
 import EmptyState from '../components/EmptyState';
-import { ClipboardList, Star, TrendingUp, ThumbsUp, Users, Download } from 'lucide-react';
+import { ClipboardList, Star, TrendingUp, ThumbsUp, Users, Download, BarChart3 } from 'lucide-react';
 import { nairobiColors } from '../theme/nairobiTheme';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
-const TASKS = [
+const CITIZEN_TASKS = [
   { id: 1, text: 'Navigate to "Submit Complaint" from the side menu.' },
   { id: 2, text: 'Submit a complaint with Category "Waste Management", Title "Uncollected garbage near my residence", Description of your choice, and Location "Westlands, Nairobi".' },
   { id: 3, text: 'Navigate to "My Complaints" and verify your complaint appears in the list.' },
@@ -27,12 +27,20 @@ const TASKS = [
   { id: 5, text: 'Submit a second complaint with Category "Roads" and a title and location of your choice.' },
 ];
 
+const OFFICIAL_TASKS = [
+  { id: 1, text: 'Navigate to "Complaints" from the side menu.' },
+  { id: 2, text: 'Open a complaint within your department (or assigned to you) and review its full details and status history.' },
+  { id: 3, text: 'Update the complaint\'s status (e.g. move it to "Under Review" or "In Progress") and record a resolution note.' },
+  { id: 4, text: 'Navigate to "Analytics" and review the service-delivery indicators shown there.' },
+  { id: 5, text: 'Return to this page to complete the evaluation.' },
+];
+
 const TAM_PU = [
-  'Using this system improves my ability to report public service issues.',
+  'Using this system improves my ability to carry out my tasks on the platform.',
   'Using this system makes it easier to track complaint resolution.',
   'Using this system enhances my engagement with county government.',
   'I find this system useful for monitoring public service delivery.',
-  'Using this system increases my productivity in reporting issues.',
+  'Using this system increases my productivity in carrying out my tasks on the platform.',
   'Overall, I find this system useful.',
 ];
 
@@ -46,8 +54,8 @@ const TAM_PEOU = [
 ];
 
 const TAM_BI = [
-  'I intend to use this system for reporting public service issues.',
-  'I would recommend this system to other citizens.',
+  'I intend to continue using this system for my role on the platform.',
+  'I would recommend this system to others.',
   'I plan to use this system frequently in the future.',
 ];
 
@@ -122,6 +130,11 @@ const EvaluationPage: React.FC = () => {
   const [analytics, setAnalytics] = useState<any>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [activeTab, setActiveTab] = useState(0); // 0 = My Evaluation, 1 = Results Dashboard (officials/admins only)
+  const [segment, setSegment] = useState<'overall' | 'citizen' | 'official_admin'>('overall');
+
+  const isCitizen = user?.role === 'citizen';
+  const TASKS = isCitizen ? CITIZEN_TASKS : OFFICIAL_TASKS;
 
   const handleExport = async () => {
     setExporting(true);
@@ -143,19 +156,24 @@ const EvaluationPage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (user?.role === 'citizen') {
-      evaluationAPI.check()
-        .then(res => { if (res.data.has_submitted) setSubmitted(true); })
-        .catch(console.error)
-        .finally(() => setChecking(false));
-    } else {
+    // Every role can now complete the evaluation, so every role needs its own
+    // has-submitted check — officials/admins are no longer routed straight to
+    // the read-only results dashboard.
+    evaluationAPI.check()
+      .then(res => { if (res.data.has_submitted) setSubmitted(true); })
+      .catch(console.error)
+      .finally(() => setChecking(false));
+
+    if (!isCitizen) {
+      // Officials/admins can still toggle to the aggregate results dashboard,
+      // so preload it in the background rather than gating the whole page on it.
       setAnalyticsLoading(true);
       evaluationAPI.getAnalytics()
         .then(res => setAnalytics(res.data))
         .catch(console.error)
-        .finally(() => { setAnalyticsLoading(false); setChecking(false); });
+        .finally(() => setAnalyticsLoading(false));
     }
-  }, [user]);
+  }, [user, isCitizen]);
 
   const handleLikert = (key: string, val: number) => {
     setLikertValues({ ...likertValues, [key]: val });
@@ -221,35 +239,58 @@ const EvaluationPage: React.FC = () => {
 
   if (checking) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10 }}><CircularProgress color="primary" /></Box>;
 
-  // --- Official/Admin: Analytics View ---
-  if (user?.role !== 'citizen') {
-    if (analyticsLoading) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10 }}><CircularProgress color="primary" /></Box>;
-    if (!analytics || analytics.total_responses === 0) {
+  // --- Official/Admin: Results Dashboard tab content ---
+  const renderDashboard = () => {
+    if (analyticsLoading) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}><CircularProgress color="primary" /></Box>;
+    if (!analytics) return null;
+
+    const segmentData = analytics[segment];
+
+    const segmentSwitcher = (
+      <ToggleButtonGroup
+        value={segment}
+        exclusive
+        size="small"
+        onChange={(_, val) => val && setSegment(val)}
+        sx={{
+          mb: 3,
+          '& .MuiToggleButton-root.Mui-selected': {
+            bgcolor: nairobiColors.green.main,
+            color: '#fff',
+            '&:hover': { bgcolor: nairobiColors.green.dark },
+          },
+        }}
+      >
+        <ToggleButton value="overall">All ({analytics.overall.total_responses})</ToggleButton>
+        <ToggleButton value="citizen">Citizens ({analytics.citizen.total_responses})</ToggleButton>
+        <ToggleButton value="official_admin">Officials &amp; Admins ({analytics.official_admin.total_responses})</ToggleButton>
+      </ToggleButtonGroup>
+    );
+
+    if (!segmentData || segmentData.total_responses === 0) {
       return (
         <Box>
-          <Typography variant="h5" fontWeight={700} gutterBottom sx={{ color: nairobiColors.green.dark }}>Evaluation Results</Typography>
+          {segmentSwitcher}
           <Paper sx={{ p: 4 }}>
             <EmptyState
               icon={ClipboardList}
-              title="No evaluation responses yet."
-              description="Results will appear here once participants complete the evaluation."
+              title="No evaluation responses in this segment yet."
+              description="Results will appear here once participants in this group complete the evaluation."
             />
           </Paper>
         </Box>
       );
     }
 
-    const { tam, demographics: demo } = analytics;
+    const { tam, demographics: demo } = segmentData;
 
     return (
       <Box>
+        {segmentSwitcher}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 2 }}>
-          <Box>
-            <Typography variant="h5" fontWeight={700} gutterBottom sx={{ color: nairobiColors.green.dark }}>Evaluation Results</Typography>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
-              TAM (Davis, 1989) — {analytics.total_responses} responses
-            </Typography>
-          </Box>
+          <Typography variant="body2" color="text.secondary" gutterBottom>
+            TAM (Davis, 1989) — {segmentData.total_responses} responses
+          </Typography>
           <Button
             variant="contained"
             startIcon={<Download size={18} strokeWidth={1.75} />}
@@ -263,7 +304,7 @@ const EvaluationPage: React.FC = () => {
 
         <Grid container spacing={3} sx={{ mt: 1 }}>
           <Grid item xs={6} sm={3}>
-            <StatCard title="Responses" value={analytics.total_responses} icon={Users} color={nairobiColors.green.main} />
+            <StatCard title="Responses" value={segmentData.total_responses} icon={Users} color={nairobiColors.green.main} />
           </Grid>
           <Grid item xs={6} sm={3}>
             <StatCard title="Usefulness" value={`${tam.perceived_usefulness.mean}/5`} icon={ThumbsUp} color="#2196F3" />
@@ -345,24 +386,24 @@ const EvaluationPage: React.FC = () => {
         </Grid>
       </Box>
     );
-  }
+  };
 
-  // --- Citizen: Already Submitted ---
-  if (submitted) {
-    return (
-      <Box sx={{ textAlign: 'center', mt: 8 }}>
-        <Star size={80} color={nairobiColors.gold.main} strokeWidth={1.5} />
-        <Typography variant="h4" fontWeight={700} sx={{ mt: 2, color: nairobiColors.green.dark }}>Thank You!</Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
-          Your evaluation has been recorded successfully. Your feedback is valuable in improving public service delivery in Nairobi County.
-        </Typography>
-      </Box>
-    );
-  }
+  // --- "My Evaluation" tab content (all roles) ---
+  const renderMyEvaluation = () => {
+    if (submitted) {
+      return (
+        <Box sx={{ textAlign: 'center', mt: 8 }}>
+          <Star size={80} color={nairobiColors.gold.main} strokeWidth={1.5} />
+          <Typography variant="h4" fontWeight={700} sx={{ mt: 2, color: nairobiColors.green.dark }}>Thank You!</Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+            Your evaluation has been recorded successfully. Your feedback is valuable in improving public service delivery in Nairobi County.
+          </Typography>
+        </Box>
+      );
+    }
 
-  // --- Citizen: Informed Consent Gate ---
-  if (!consented) {
-    return (
+    if (!consented) {
+      return (
       <Box>
         <Typography variant="h5" fontWeight={700} gutterBottom sx={{ color: nairobiColors.green.dark }}>
           Informed Consent
@@ -408,11 +449,11 @@ const EvaluationPage: React.FC = () => {
           </Box>
         </Paper>
       </Box>
-    );
-  }
+      );
+    }
 
-  // --- Citizen: Evaluation Flow ---
-  return (
+    // --- Evaluation stepper flow (all roles) ---
+    return (
     <Box>
       <Typography variant="h5" fontWeight={700} gutterBottom sx={{ color: nairobiColors.green.dark }}>System Evaluation</Typography>
       <Typography variant="body2" color="text.secondary" gutterBottom>
@@ -569,6 +610,41 @@ const EvaluationPage: React.FC = () => {
             {loading ? 'Submitting...' : activeStep === 2 ? 'Submit Evaluation' : 'Next'}
           </Button>
         </Box>
+      )}
+    </Box>
+    );
+  };
+
+  return (
+    <Box>
+      {!isCitizen && (
+        <Tabs
+          value={activeTab}
+          onChange={(_, val) => setActiveTab(val)}
+          sx={{
+            mb: 3,
+            borderBottom: 1,
+            borderColor: 'divider',
+            '& .Mui-selected': { color: `${nairobiColors.green.main} !important` },
+            '& .MuiTabs-indicator': { backgroundColor: nairobiColors.green.main },
+          }}
+        >
+          <Tab label="My Evaluation" />
+          <Tab
+            label="Results Dashboard"
+            icon={<BarChart3 size={16} strokeWidth={1.75} />}
+            iconPosition="start"
+          />
+        </Tabs>
+      )}
+
+      {!isCitizen && activeTab === 1 ? (
+        <>
+          <Typography variant="h5" fontWeight={700} gutterBottom sx={{ color: nairobiColors.green.dark }}>Evaluation Results</Typography>
+          {renderDashboard()}
+        </>
+      ) : (
+        renderMyEvaluation()
       )}
     </Box>
   );

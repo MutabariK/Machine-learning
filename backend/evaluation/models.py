@@ -45,11 +45,11 @@ class EvaluationResponse(models.Model):
     county_of_residence = models.CharField(max_length=100)
 
     # TAM — Perceived Usefulness (Davis, 1989)
-    pu_1 = models.IntegerField(validators=LIKERT, help_text="Using this system improves my ability to report public service issues")
+    pu_1 = models.IntegerField(validators=LIKERT, help_text="Using this system improves my ability to carry out my tasks on the platform")
     pu_2 = models.IntegerField(validators=LIKERT, help_text="Using this system makes it easier to track complaint resolution")
     pu_3 = models.IntegerField(validators=LIKERT, help_text="Using this system enhances my engagement with county government")
     pu_4 = models.IntegerField(validators=LIKERT, help_text="I find this system useful for monitoring public service delivery")
-    pu_5 = models.IntegerField(validators=LIKERT, help_text="Using this system increases my productivity in reporting issues")
+    pu_5 = models.IntegerField(validators=LIKERT, help_text="Using this system increases my productivity in carrying out my tasks on the platform")
     pu_6 = models.IntegerField(validators=LIKERT, help_text="Overall, I find this system useful")
 
     # TAM — Perceived Ease of Use (Davis, 1989)
@@ -61,8 +61,8 @@ class EvaluationResponse(models.Model):
     peou_6 = models.IntegerField(validators=LIKERT, help_text="Overall, I find this system easy to use")
 
     # TAM — Behavioral Intention to Use
-    bi_1 = models.IntegerField(validators=LIKERT, help_text="I intend to use this system for reporting public service issues")
-    bi_2 = models.IntegerField(validators=LIKERT, help_text="I would recommend this system to other citizens")
+    bi_1 = models.IntegerField(validators=LIKERT, help_text="I intend to continue using this system for my role on the platform")
+    bi_2 = models.IntegerField(validators=LIKERT, help_text="I would recommend this system to others")
     bi_3 = models.IntegerField(validators=LIKERT, help_text="I plan to use this system frequently in the future")
 
     created_at = models.DateTimeField(auto_now_add=True)
