@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'django_filters',
     'core',
@@ -120,6 +121,11 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': True,
+    # Without this, ROTATE_REFRESH_TOKENS issues a new refresh token on every
+    # use but never invalidates the one it replaced — a stolen refresh token
+    # stays usable until its own expiry regardless of rotation. Blacklisting
+    # the old token on each rotation closes that gap.
+    'BLACKLIST_AFTER_ROTATION': True,
 }
 
 CORS_ALLOWED_ORIGINS = os.environ.get(
