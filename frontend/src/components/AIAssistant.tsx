@@ -193,7 +193,7 @@ const AIAssistant: React.FC = () => {
               Nairobi AI Assistant
             </Typography>
             <Typography variant="caption" sx={{ color: alpha('#fff', 0.7), fontSize: '0.65rem' }}>
-              Powered by MCP + Claude
+              Nairobi County Support
             </Typography>
           </Box>
           <IconButton onClick={() => setOpen(false)} size="small" sx={{ color: alpha('#fff', 0.8) }}>

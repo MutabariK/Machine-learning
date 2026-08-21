@@ -356,6 +356,21 @@ def _official_chat(msg_lower: str, original: str) -> dict:
             'actions': [{'type': 'navigate', 'path': '/complaints', 'label': 'Manage Complaints'}],
         }
 
+    if any(w in msg_lower for w in ['priority', 'priorities', 'urgent', 'urgency', 'severity']):
+        return {
+            'response': (
+                "Complaint priority is inferred automatically from each complaint's title and description:\n\n"
+                "- **Critical** — emergencies or danger to life (e.g. fire, flooding, contamination). Requires immediate attention.\n"
+                "- **High** — urgent or hazardous issues, or ones involving children, the elderly, or broken infrastructure. Address within 24 hours.\n"
+                "- **Medium** — standard issues such as damage or delays. Normal processing timeline (3–7 working days).\n"
+                "- **Low** — minor or cosmetic requests. Can be scheduled for routine maintenance.\n\n"
+                "A complaint mentioning wider community impact (e.g. 'neighborhood' or 'residents') is weighted higher. "
+                "Use this alongside submission date when deciding which complaints in your queue to handle first."
+            ),
+            'source': 'rules',
+            'actions': [{'type': 'navigate', 'path': '/complaints', 'label': 'View Complaints'}],
+        }
+
     if any(w in msg_lower for w in ['draft', 'response', 'reply', 'respond']):
         return {
             'response': (
