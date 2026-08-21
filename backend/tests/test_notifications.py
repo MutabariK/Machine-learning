@@ -17,8 +17,7 @@ class NotificationCreationTest(TestCase):
         )
         self.category = Category.objects.create(name='Roads')
         self.ward = Ward.objects.create(name='Westlands', sub_county='Westlands')
-        self.official.department = self.category
-        self.official.save()
+        self.official.departments.set([self.category])
         self.complaint = Complaint.objects.create(
             citizen=self.citizen, category=self.category, ward=self.ward,
             title='Pothole', description='Test', location='Test', status='submitted',

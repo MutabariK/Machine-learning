@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
+from complaints.models import Category
 
 User = get_user_model()
 
@@ -30,12 +31,18 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return User.objects.create_user(**validated_data)
 
 
+MAX_DEPARTMENTS_PER_OFFICIAL = 2
+
+
 class AdminUserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
+    departments = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(), many=True, required=False
+    )
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'full_name', 'phone_number', 'password', 'role', 'department', 'is_active']
+        fields = ['id', 'email', 'full_name', 'phone_number', 'password', 'role', 'departments', 'is_active']
 
     def validate_email(self, value):
         value = User.objects.normalize_email(value)
@@ -45,11 +52,14 @@ class AdminUserCreateSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         role = data.get('role', 'citizen')
-        department = data.get('department')
-        if role == 'official' and not department:
-            raise serializers.ValidationError({'department': 'Officials must be assigned to a department.'})
-        if role != 'official':
-            data['department'] = None
+        departments = data.get('departments') or []
+        if role == 'official':
+            if not departments:
+                raise serializers.ValidationError({'departments': 'Officials must be assigned to at least one department.'})
+            if len(departments) > MAX_DEPARTMENTS_PER_OFFICIAL:
+                raise serializers.ValidationError({'departments': f'Officials may be assigned to at most {MAX_DEPARTMENTS_PER_OFFICIAL} departments.'})
+        else:
+            data['departments'] = []
         return data
 
     def create(self, validated_data):
@@ -58,20 +68,33 @@ class AdminUserCreateSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    department_name = serializers.CharField(source='department.name', read_only=True, default='')
+    departments = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(), many=True, required=False
+    )
+    department_names = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'full_name', 'phone_number', 'avatar', 'role', 'department', 'department_name', 'is_active', 'created_at']
+        fields = ['id', 'email', 'full_name', 'phone_number', 'avatar', 'role', 'departments', 'department_names', 'is_active', 'created_at']
         read_only_fields = ['id', 'created_at']
+
+    def get_department_names(self, obj):
+        return ', '.join(obj.departments.values_list('name', flat=True))
 
     def validate(self, data):
         role = data.get('role', self.instance.role if self.instance else 'citizen')
-        department = data.get('department')
-        if role == 'official' and not department and not (self.instance and self.instance.department):
-            raise serializers.ValidationError({'department': 'Officials must be assigned to a department.'})
-        if role == 'citizen' and department:
-            data['department'] = None
+        departments = data.get('departments')
+        has_existing_departments = self.instance and self.instance.departments.exists()
+        if role == 'official':
+            if departments is not None:
+                if not departments:
+                    raise serializers.ValidationError({'departments': 'Officials must be assigned to at least one department.'})
+                if len(departments) > MAX_DEPARTMENTS_PER_OFFICIAL:
+                    raise serializers.ValidationError({'departments': f'Officials may be assigned to at most {MAX_DEPARTMENTS_PER_OFFICIAL} departments.'})
+            elif not has_existing_departments:
+                raise serializers.ValidationError({'departments': 'Officials must be assigned to at least one department.'})
+        elif role == 'citizen':
+            data['departments'] = []
         return data
 
 

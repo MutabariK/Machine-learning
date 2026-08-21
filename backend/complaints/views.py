@@ -13,8 +13,8 @@ from users.permissions import IsAdmin, IsOfficial
 
 
 def scope_to_official(qs, user):
-    """Officials see complaints assigned to them or under their department."""
-    return qs.filter(models.Q(assigned_to=user) | models.Q(category=user.department))
+    """Officials see complaints assigned to them or under any of their departments."""
+    return qs.filter(models.Q(assigned_to=user) | models.Q(category__in=user.departments.all()))
 
 
 class CategoryListCreateView(generics.ListCreateAPIView):

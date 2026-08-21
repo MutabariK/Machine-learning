@@ -8,6 +8,7 @@ from rest_framework.test import APIClient
 from rest_framework import status
 from PIL import Image
 from users.models import User
+from complaints.models import Category
 
 
 class UserRegistrationTest(TestCase):
@@ -120,6 +121,69 @@ class UserManagementTest(TestCase):
         self.client.force_authenticate(user=self.citizen)
         response = self.client.get('/api/auth/users/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class OfficialDepartmentAssignmentTest(TestCase):
+    """An official may cover up to 2 departments; admins are unrestricted
+    regardless of what's set here (see ComplaintUpdateView, which grants
+    admin unrestricted access without consulting departments at all)."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.admin = User.objects.create_superuser(
+            email='admin@example.com', full_name='Admin', password='admin12345'
+        )
+        self.roads = Category.objects.create(name='Roads')
+        self.water = Category.objects.create(name='Water')
+        self.security = Category.objects.create(name='Security')
+        self.client.force_authenticate(user=self.admin)
+
+    def test_create_official_with_two_departments(self):
+        response = self.client.post('/api/auth/users/', {
+            'email': 'official@example.com', 'full_name': 'Official',
+            'password': 'official123', 'role': 'official',
+            'departments': [self.roads.id, self.water.id],
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        official = User.objects.get(email='official@example.com')
+        self.assertEqual(
+            set(official.departments.values_list('name', flat=True)),
+            {'Roads', 'Water'},
+        )
+
+    def test_cannot_create_official_with_three_departments(self):
+        response = self.client.post('/api/auth/users/', {
+            'email': 'official@example.com', 'full_name': 'Official',
+            'password': 'official123', 'role': 'official',
+            'departments': [self.roads.id, self.water.id, self.security.id],
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('departments', response.data)
+
+    def test_cannot_create_official_with_no_departments(self):
+        response = self.client.post('/api/auth/users/', {
+            'email': 'official@example.com', 'full_name': 'Official',
+            'password': 'official123', 'role': 'official',
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('departments', response.data)
+
+    def test_update_official_departments(self):
+        official = User.objects.create_user(
+            email='official@example.com', full_name='Official',
+            password='official123', role='official',
+        )
+        official.departments.set([self.roads])
+        response = self.client.patch(f'/api/auth/users/{official.id}/', {
+            'departments': [self.water.id, self.security.id],
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        official.refresh_from_db()
+        self.assertEqual(
+            set(official.departments.values_list('name', flat=True)),
+            {'Water', 'Security'},
+        )
+        self.assertEqual(set(response.data['department_names'].split(', ')), {'Water', 'Security'})
 
 
 class PasswordResetTest(TestCase):

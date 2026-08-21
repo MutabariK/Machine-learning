@@ -105,7 +105,7 @@ class PasswordResetConfirmView(APIView):
 class UserListView(generics.ListCreateAPIView):
     queryset = User.objects.all()
     permission_classes = [IsAdmin]
-    filterset_fields = ['role', 'is_active', 'department']
+    filterset_fields = ['role', 'is_active', 'departments']
     search_fields = ['full_name', 'email']
     ordering_fields = ['created_at', 'full_name']
 

@@ -11,9 +11,11 @@ import { useAuth } from '../contexts/AuthContext';
 import { User, Category } from '../types';
 import { nairobiColors } from '../theme/nairobiTheme';
 
+const MAX_DEPARTMENTS = 2;
+
 const emptyCreateForm = {
   email: '', full_name: '', phone_number: '', password: '',
-  role: 'citizen', department: '' as string,
+  role: 'citizen', departments: [] as number[],
 };
 
 const roleColors: Record<string, string> = {
@@ -31,7 +33,7 @@ const UserManagementPage: React.FC = () => {
   const [filters, setFilters] = useState({ role: '', search: '' });
   const [editOpen, setEditOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [editForm, setEditForm] = useState({ role: '', department: '' as string, is_active: true });
+  const [editForm, setEditForm] = useState({ role: '', departments: [] as number[], is_active: true });
   const [createOpen, setCreateOpen] = useState(false);
   const [createForm, setCreateForm] = useState(emptyCreateForm);
   const [createError, setCreateError] = useState('');
@@ -67,7 +69,7 @@ const UserManagementPage: React.FC = () => {
     setSelectedUser(user);
     setEditForm({
       role: user.role,
-      department: user.department ? String(user.department) : '',
+      departments: user.departments || [],
       is_active: user.is_active,
     });
     setEditOpen(true);
@@ -79,26 +81,26 @@ const UserManagementPage: React.FC = () => {
     setLoading(true);
     setError('');
     try {
-      const data: Record<string, string | number | boolean | null> = {
+      const data: Record<string, string | number[] | boolean> = {
         role: editForm.role,
         is_active: editForm.is_active,
       };
       if (editForm.role === 'official') {
-        if (!editForm.department) {
-          setError('Please assign a department for this official.');
+        if (editForm.departments.length === 0) {
+          setError('Please assign at least one department for this official.');
           setLoading(false);
           return;
         }
-        data.department = Number(editForm.department);
+        data.departments = editForm.departments;
       } else {
-        data.department = null;
+        data.departments = [];
       }
       await usersAPI.update(selectedUser.id, data);
       setEditOpen(false);
       setMessage(`${selectedUser.full_name} updated successfully.`);
       loadUsers();
     } catch (err: any) {
-      const detail = err.response?.data?.department?.[0]
+      const detail = err.response?.data?.departments?.[0]
         || err.response?.data?.detail
         || 'Failed to update user.';
       setError(detail);
@@ -117,8 +119,8 @@ const UserManagementPage: React.FC = () => {
     setCreateLoading(true);
     setCreateError('');
     try {
-      if (createForm.role === 'official' && !createForm.department) {
-        setCreateError('Please assign a department for this official.');
+      if (createForm.role === 'official' && createForm.departments.length === 0) {
+        setCreateError('Please assign at least one department for this official.');
         setCreateLoading(false);
         return;
       }
@@ -128,14 +130,14 @@ const UserManagementPage: React.FC = () => {
         phone_number: createForm.phone_number,
         password: createForm.password,
         role: createForm.role,
-        department: createForm.role === 'official' ? Number(createForm.department) : null,
+        departments: createForm.role === 'official' ? createForm.departments : [],
       });
       setCreateOpen(false);
       setMessage(`${createForm.full_name} added successfully.`);
       loadUsers();
     } catch (err: any) {
       const detail = err.response?.data?.email?.[0]
-        || err.response?.data?.department?.[0]
+        || err.response?.data?.departments?.[0]
         || err.response?.data?.password?.[0]
         || err.response?.data?.detail
         || 'Failed to create user.';
@@ -229,7 +231,7 @@ const UserManagementPage: React.FC = () => {
                     }}
                   />
                 </TableCell>
-                <TableCell>{u.department_name || '—'}</TableCell>
+                <TableCell>{u.department_names || '—'}</TableCell>
                 <TableCell>
                   <Chip
                     label={u.is_active ? 'Active' : 'Inactive'} size="small"
@@ -282,19 +284,30 @@ const UserManagementPage: React.FC = () => {
           <TextField fullWidth margin="normal" label="Email" value={selectedUser?.email || ''} disabled />
 
           <TextField fullWidth margin="normal" label="Role" select value={editForm.role}
-            onChange={(e) => setEditForm({ ...editForm, role: e.target.value, department: e.target.value !== 'official' ? '' : editForm.department })}>
+            onChange={(e) => setEditForm({ ...editForm, role: e.target.value, departments: e.target.value !== 'official' ? [] : editForm.departments })}>
             <MenuItem value="citizen">Citizen</MenuItem>
             <MenuItem value="official">County Official</MenuItem>
             <MenuItem value="admin">Administrator</MenuItem>
           </TextField>
 
           {editForm.role === 'official' && (
-            <TextField fullWidth margin="normal" label="Department" select value={editForm.department}
-              onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}
+            <TextField
+              fullWidth margin="normal" label="Departments" select
+              SelectProps={{
+                multiple: true,
+                renderValue: (selected) => categories
+                  .filter(c => (selected as number[]).includes(c.id))
+                  .map(c => c.name)
+                  .join(', '),
+              }}
+              value={editForm.departments}
+              onChange={(e) => {
+                const value = e.target.value as unknown as number[];
+                if (value.length <= MAX_DEPARTMENTS) setEditForm({ ...editForm, departments: value });
+              }}
               required
-              helperText="Assign this official to a county department">
-              <MenuItem value="">— Select Department —</MenuItem>
-              {categories.map(c => <MenuItem key={c.id} value={String(c.id)}>{c.name}</MenuItem>)}
+              helperText={`Assign this official to up to ${MAX_DEPARTMENTS} county departments`}>
+              {categories.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
             </TextField>
           )}
 
@@ -342,19 +355,30 @@ const UserManagementPage: React.FC = () => {
             onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })} />
 
           <TextField fullWidth margin="normal" label="Role" select value={createForm.role}
-            onChange={(e) => setCreateForm({ ...createForm, role: e.target.value, department: e.target.value !== 'official' ? '' : createForm.department })}>
+            onChange={(e) => setCreateForm({ ...createForm, role: e.target.value, departments: e.target.value !== 'official' ? [] : createForm.departments })}>
             <MenuItem value="citizen">Citizen</MenuItem>
             <MenuItem value="official">County Official</MenuItem>
             <MenuItem value="admin">Administrator</MenuItem>
           </TextField>
 
           {createForm.role === 'official' && (
-            <TextField fullWidth margin="normal" label="Department" select value={createForm.department}
-              onChange={(e) => setCreateForm({ ...createForm, department: e.target.value })}
+            <TextField
+              fullWidth margin="normal" label="Departments" select
+              SelectProps={{
+                multiple: true,
+                renderValue: (selected) => categories
+                  .filter(c => (selected as number[]).includes(c.id))
+                  .map(c => c.name)
+                  .join(', '),
+              }}
+              value={createForm.departments}
+              onChange={(e) => {
+                const value = e.target.value as unknown as number[];
+                if (value.length <= MAX_DEPARTMENTS) setCreateForm({ ...createForm, departments: value });
+              }}
               required
-              helperText="Assign this official to a county department">
-              <MenuItem value="">— Select Department —</MenuItem>
-              {categories.map(c => <MenuItem key={c.id} value={String(c.id)}>{c.name}</MenuItem>)}
+              helperText={`Assign this official to up to ${MAX_DEPARTMENTS} county departments`}>
+              {categories.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
             </TextField>
           )}
         </DialogContent>

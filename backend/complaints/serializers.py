@@ -156,9 +156,9 @@ class ComplaintUpdateSerializer(serializers.ModelSerializer):
                 'Complaints can only be assigned to county officials.'
             )
         category = self.instance.category if self.instance else None
-        if category is not None and value.department_id != category.id:
+        if category is not None and not value.departments.filter(id=category.id).exists():
             raise serializers.ValidationError(
-                f'{value.full_name} is not in the department responsible for this complaint\'s category.'
+                f'{value.full_name} is not in a department responsible for this complaint\'s category.'
             )
         return value
 

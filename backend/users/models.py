@@ -7,9 +7,15 @@ class UserManager(BaseUserManager):
         if not email:
             raise ValueError('Email is required')
         email = self.normalize_email(email)
+        # departments is a many-to-many relation, which Django cannot set
+        # until the instance has a primary key -- pull it out, save first,
+        # then assign it.
+        departments = extra_fields.pop('departments', None)
         user = self.model(email=email, full_name=full_name, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
+        if departments is not None:
+            user.departments.set(departments)
         return user
 
     def create_superuser(self, email, full_name, password=None, **extra_fields):
@@ -31,9 +37,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     phone_number = models.CharField(max_length=20, blank=True)
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='citizen', db_index=True)
-    department = models.ForeignKey(
-        'complaints.Category', on_delete=models.SET_NULL,
-        null=True, blank=True, related_name='officials',
+    # An official may cover up to 2 departments (enforced in the serializer,
+    # not at the DB level); admins are not restricted by department at all
+    # -- ComplaintUpdateView grants them unrestricted access regardless of
+    # what's in this field.
+    departments = models.ManyToManyField(
+        'complaints.Category', blank=True, related_name='officials',
     )
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)

@@ -5,8 +5,8 @@ export interface User {
   phone_number: string;
   avatar?: string | null;
   role: 'citizen' | 'official' | 'admin';
-  department: number | null;
-  department_name: string;
+  departments: number[];
+  department_names: string;
   is_active: boolean;
   created_at: string;
 }

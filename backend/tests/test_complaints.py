@@ -46,8 +46,7 @@ class ComplaintTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_official_sees_own_department_complaints(self):
-        self.official.department = self.category
-        self.official.save()
+        self.official.departments.set([self.category])
         Complaint.objects.create(
             citizen=self.citizen, category=self.category, ward=self.ward,
             title='In department', description='Test', location='Test', status='submitted'
@@ -64,8 +63,7 @@ class ComplaintTest(TestCase):
         self.assertNotIn('Other department', titles)
 
     def test_official_sees_complaint_assigned_to_them_outside_department(self):
-        self.official.department = self.category
-        self.official.save()
+        self.official.departments.set([self.category])
         assigned = Complaint.objects.create(
             citizen=self.citizen, category=self.other_category, ward=self.ward,
             assigned_to=self.official,
@@ -77,8 +75,7 @@ class ComplaintTest(TestCase):
         self.assertIn('Assigned but other department', titles)
 
     def test_official_update_status(self):
-        self.official.department = self.category
-        self.official.save()
+        self.official.departments.set([self.category])
         self.client.force_authenticate(user=self.official)
         complaint = Complaint.objects.create(
             citizen=self.citizen, category=self.category, ward=self.ward,
@@ -92,8 +89,7 @@ class ComplaintTest(TestCase):
         self.assertEqual(complaint.status, 'under_review')
 
     def test_official_cannot_update_other_department_unassigned_complaint(self):
-        self.official.department = self.category
-        self.official.save()
+        self.official.departments.set([self.category])
         self.client.force_authenticate(user=self.official)
         complaint = Complaint.objects.create(
             citizen=self.citizen, category=self.other_category, ward=self.ward,
@@ -108,8 +104,7 @@ class ComplaintTest(TestCase):
         admin = User.objects.create_superuser(
             email='admin2@example.com', full_name='Admin', password='admin12345'
         )
-        self.official.department = self.category
-        self.official.save()
+        self.official.departments.set([self.category])
         complaint = Complaint.objects.create(
             citizen=self.citizen, category=self.category, ward=self.ward,
             title='Test', description='Test', location='Test', status='submitted'
@@ -126,8 +121,7 @@ class ComplaintTest(TestCase):
         admin = User.objects.create_superuser(
             email='admin3@example.com', full_name='Admin', password='admin12345'
         )
-        self.official.department = self.other_category
-        self.official.save()
+        self.official.departments.set([self.other_category])
         complaint = Complaint.objects.create(
             citizen=self.citizen, category=self.category, ward=self.ward,
             title='Test', description='Test', location='Test', status='submitted'
@@ -166,8 +160,7 @@ class ComplaintTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_official_cannot_view_other_department_complaint_detail(self):
-        self.official.department = self.category
-        self.official.save()
+        self.official.departments.set([self.category])
         complaint = Complaint.objects.create(
             citizen=self.citizen, category=self.other_category, ward=self.ward,
             title='Test', description='Test', location='Test', status='submitted'
@@ -198,6 +191,40 @@ class ComplaintTest(TestCase):
             'comment': 'Good service',
         }, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_official_covering_two_departments_sees_both(self):
+        self.official.departments.set([self.category, self.other_category])
+        Complaint.objects.create(
+            citizen=self.citizen, category=self.category, ward=self.ward,
+            title='Roads complaint', description='Test', location='Test', status='submitted'
+        )
+        Complaint.objects.create(
+            citizen=self.citizen, category=self.other_category, ward=self.ward,
+            title='Water complaint', description='Test', location='Test', status='submitted'
+        )
+        self.client.force_authenticate(user=self.official)
+        response = self.client.get('/api/complaints/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        titles = {c['title'] for c in response.data['results']}
+        self.assertIn('Roads complaint', titles)
+        self.assertIn('Water complaint', titles)
+
+    def test_official_covering_two_departments_can_be_assigned_either(self):
+        self.official.departments.set([self.category, self.other_category])
+        admin = User.objects.create_superuser(
+            email='admin5@example.com', full_name='Admin', password='admin12345'
+        )
+        water_complaint = Complaint.objects.create(
+            citizen=self.citizen, category=self.other_category, ward=self.ward,
+            title='Test', description='Test', location='Test', status='submitted'
+        )
+        self.client.force_authenticate(user=admin)
+        response = self.client.patch(f'/api/complaints/{water_complaint.id}/update/', {
+            'assigned_to': self.official.id
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        water_complaint.refresh_from_db()
+        self.assertEqual(water_complaint.assigned_to, self.official)
 
 
 class CategoryWardTest(TestCase):

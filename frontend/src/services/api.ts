@@ -149,7 +149,7 @@ export const analyticsAPI = {
 
 interface UserUpdateData {
   role?: string;
-  department?: number | null;
+  departments?: number[];
   is_active?: boolean;
 }
 
@@ -159,7 +159,7 @@ interface UserCreateData {
   phone_number?: string;
   password: string;
   role: string;
-  department?: number | null;
+  departments?: number[];
   is_active?: boolean;
 }
 

@@ -110,7 +110,7 @@ const ComplaintsPage: React.FC = () => {
     setDepartmentOfficials([]);
     setUpdateOpen(true);
     if (user?.role === 'admin') {
-      usersAPI.list({ role: 'official', department: complaint.category, is_active: 'true' })
+      usersAPI.list({ role: 'official', departments: complaint.category, is_active: 'true' })
         .then(res => setDepartmentOfficials(res.data.results || res.data))
         .catch(() => setDepartmentOfficials([]));
     }

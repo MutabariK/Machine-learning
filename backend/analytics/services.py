@@ -184,25 +184,33 @@ class AnalyticsService:
 
     @staticmethod
     def get_official_performance(date_from=None, date_to=None):
-        qs = Complaint.objects.filter(assigned_to__isnull=False).select_related('assigned_to', 'assigned_to__department')
+        qs = Complaint.objects.filter(assigned_to__isnull=False).select_related('assigned_to')
         if date_from:
             qs = qs.filter(created_at__gte=date_from)
         if date_to:
             qs = qs.filter(created_at__lte=date_to)
 
-        data = list(qs.values(
-            'id', 'status', 'assigned_to_id', 'assigned_to__full_name',
-            'assigned_to__department__name',
-        ))
+        data = list(qs.values('id', 'status', 'assigned_to_id', 'assigned_to__full_name'))
         if not data:
             return []
 
         df = pd.DataFrame(data)
-        df.rename(columns={
-            'assigned_to__full_name': 'official',
-            'assigned_to__department__name': 'department',
-        }, inplace=True)
-        df['department'] = df['department'].fillna('Unassigned')
+        df.rename(columns={'assigned_to__full_name': 'official'}, inplace=True)
+
+        # Departments are now many-to-many, so they're resolved separately
+        # (one row per official-department pair) rather than joined directly
+        # onto the complaint queryset above, which would fan out a complaint
+        # into duplicate rows for every department its assignee belongs to.
+        dept_pairs = User.objects.filter(
+            id__in=df['assigned_to_id'].unique()
+        ).values_list('id', 'departments__name')
+        dept_names_by_official = {}
+        for official_id, dept_name in dept_pairs:
+            if dept_name:
+                dept_names_by_official.setdefault(official_id, []).append(dept_name)
+        df['department'] = df['assigned_to_id'].map(
+            lambda oid: ', '.join(sorted(dept_names_by_official.get(oid, []))) or 'Unassigned'
+        )
 
         feedback_qs = Feedback.objects.filter(complaint__assigned_to__isnull=False)
         if date_from:
