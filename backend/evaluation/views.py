@@ -62,7 +62,7 @@ class EvaluationListView(generics.ListAPIView):
 
 
 PU_LABELS = [
-    "Improves ability to carry out tasks", "Easier to track resolution",
+    "Helps accomplish tasks more quickly", "Easier to track resolution",
     "Enhances engagement with government", "Useful for monitoring delivery",
     "Increases productivity", "Overall useful",
 ]

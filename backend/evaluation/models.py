@@ -45,7 +45,7 @@ class EvaluationResponse(models.Model):
     county_of_residence = models.CharField(max_length=100)
 
     # TAM — Perceived Usefulness (Davis, 1989)
-    pu_1 = models.IntegerField(validators=LIKERT, help_text="Using this system improves my ability to carry out my tasks on the platform")
+    pu_1 = models.IntegerField(validators=LIKERT, help_text="Using this system helps me accomplish my tasks more quickly")
     pu_2 = models.IntegerField(validators=LIKERT, help_text="Using this system makes it easier to track complaint resolution")
     pu_3 = models.IntegerField(validators=LIKERT, help_text="Using this system enhances my engagement with county government")
     pu_4 = models.IntegerField(validators=LIKERT, help_text="I find this system useful for monitoring public service delivery")

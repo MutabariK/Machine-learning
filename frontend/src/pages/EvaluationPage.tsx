@@ -36,7 +36,7 @@ const OFFICIAL_TASKS = [
 ];
 
 const TAM_PU = [
-  'Using this system improves my ability to carry out my tasks on the platform.',
+  'Using this system helps me accomplish my tasks more quickly.',
   'Using this system makes it easier to track complaint resolution.',
   'Using this system enhances my engagement with county government.',
   'I find this system useful for monitoring public service delivery.',
