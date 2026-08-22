@@ -4,6 +4,7 @@ import {
   Box, Paper, Typography, Button, Stepper, Step, StepLabel, Radio, RadioGroup,
   FormControlLabel, FormControl, FormLabel, TextField, MenuItem, Checkbox,
   Alert, CircularProgress, Divider, Grid, Tabs, Tab, ToggleButtonGroup, ToggleButton,
+  Table, TableBody, TableRow, TableCell,
 } from '@mui/material';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import {
@@ -372,21 +373,48 @@ const EvaluationPage: React.FC = () => {
         {/* Demographics */}
         <Typography variant="h6" fontWeight={700} sx={{ mt: 4, mb: 2, color: nairobiColors.green.dark }}>Respondent Demographics</Typography>
         <Grid container spacing={3}>
-          {Object.entries(demo).map(([field, counts]: [string, any]) => (
-            <Grid item xs={12} sm={6} md={4} key={field}>
-              <Paper sx={{ p: 3 }}>
-                <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                  {field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                </Typography>
-                <Box sx={{ position: 'relative', height: 220 }}>
-                  <Doughnut data={{
-                    labels: Object.keys(counts),
-                    datasets: [{ data: Object.values(counts) as number[], backgroundColor: CHART_COLORS }],
-                  }} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } } }} />
-                </Box>
-              </Paper>
-            </Grid>
-          ))}
+          {Object.entries(demo).map(([field, counts]: [string, any]) => {
+            const total = (Object.values(counts) as number[]).reduce((a, b) => a + b, 0);
+            return (
+              <Grid item xs={12} sm={6} md={4} key={field}>
+                <Paper sx={{ p: 3 }}>
+                  <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                    {field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </Typography>
+                  <Box sx={{ position: 'relative', height: 220 }}>
+                    <Doughnut data={{
+                      labels: Object.keys(counts),
+                      datasets: [{ data: Object.values(counts) as number[], backgroundColor: CHART_COLORS }],
+                    }} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } } }} />
+                  </Box>
+                  <Table size="small" sx={{ mt: 1 }}>
+                    <TableBody>
+                      {Object.entries(counts as Record<string, number>).map(([label, count]) => (
+                        <TableRow key={label}>
+                          <TableCell sx={{ border: 0, py: 0.4, pl: 0 }}>{label}</TableCell>
+                          <TableCell sx={{ border: 0, py: 0.4 }} align="right">{count}</TableCell>
+                          <TableCell sx={{ border: 0, py: 0.4, pr: 0 }} align="right">
+                            {total ? ((count / total) * 100).toFixed(1) : '0.0'}%
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      <TableRow>
+                        <TableCell sx={{ pl: 0, pt: 1, fontWeight: 700, borderBottom: 0, borderTop: '1px solid #e0e0e0' }}>
+                          Total
+                        </TableCell>
+                        <TableCell sx={{ pt: 1, fontWeight: 700, borderBottom: 0, borderTop: '1px solid #e0e0e0' }} align="right">
+                          {total}
+                        </TableCell>
+                        <TableCell sx={{ pr: 0, pt: 1, fontWeight: 700, borderBottom: 0, borderTop: '1px solid #e0e0e0' }} align="right">
+                          100%
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </Paper>
+              </Grid>
+            );
+          })}
         </Grid>
       </Box>
     );
