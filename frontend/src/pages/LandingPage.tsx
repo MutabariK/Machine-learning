@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import {
-  Box, Container, Typography, Button, Grid, Paper, Chip, alpha, Fade,
+  Box, Container, Typography, Button, Grid, Paper, alpha, Fade,
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import {
@@ -146,16 +146,15 @@ const LandingPage: React.FC = () => {
         <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
           <Fade in timeout={700}>
             <Box>
-              <Chip
-                label="OFFICIAL CITIZEN PORTAL"
+              <Typography
                 sx={{
-                  mb: 3, px: 1, py: 2.2,
-                  bgcolor: alpha('#fff', 0.15), color: '#fff', fontWeight: 700,
+                  mb: 3, color: '#fff', fontWeight: 700,
                   letterSpacing: 1.5, fontSize: '0.7rem',
-                  border: `1px solid ${alpha('#fff', 0.3)}`,
-                  backdropFilter: 'blur(10px)',
+                  textTransform: 'uppercase',
                 }}
-              />
+              >
+                Official Citizen Portal
+              </Typography>
               <Typography
                 variant="h2" fontWeight={800}
                 sx={{
