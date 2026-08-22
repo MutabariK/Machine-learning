@@ -257,14 +257,9 @@ def suggest_complaint_category(title: str, description: str) -> str:
     categories = list(Category.objects.filter(is_active=True).values_list('name', flat=True))
 
     keywords_map = {
-        'Water': ['water', 'pipe', 'leak', 'supply', 'tap', 'drainage', 'sewage', 'flood'],
-        'Roads': ['road', 'pothole', 'highway', 'street', 'pavement', 'tarmac', 'traffic'],
+        'Water Services': ['water', 'pipe', 'leak', 'supply', 'tap', 'drainage', 'sewage', 'flood'],
+        'Road Maintenance': ['road', 'pothole', 'highway', 'street', 'pavement', 'tarmac', 'traffic'],
         'Waste Management': ['waste', 'garbage', 'trash', 'rubbish', 'dump', 'bin', 'collection', 'litter'],
-        'Security': ['security', 'crime', 'theft', 'robbery', 'safety', 'police', 'light', 'lighting'],
-        'Health': ['health', 'hospital', 'clinic', 'medical', 'sanitation', 'disease'],
-        'Education': ['school', 'education', 'learning', 'teacher', 'student'],
-        'Housing': ['house', 'housing', 'building', 'construction', 'rent', 'shelter'],
-        'Environment': ['environment', 'pollution', 'noise', 'air', 'tree', 'park', 'green'],
     }
 
     text = f"{title} {description}".lower()
@@ -272,11 +267,10 @@ def suggest_complaint_category(title: str, description: str) -> str:
 
     for cat_name in categories:
         score = 0
-        keywords = keywords_map.get(cat_name, [cat_name.lower().split()])
-        if isinstance(keywords, list):
-            for kw in keywords:
-                if kw in text:
-                    score += 1
+        keywords = keywords_map.get(cat_name, cat_name.lower().split())
+        for kw in keywords:
+            if kw in text:
+                score += 1
         scores[cat_name] = score
 
     sorted_cats = sorted(scores.items(), key=lambda x: x[1], reverse=True)

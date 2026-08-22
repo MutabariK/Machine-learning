@@ -6,8 +6,7 @@ import {
 import { motion } from 'framer-motion';
 import {
   FileText, Radar, CheckCircle2, Star, Droplet, Construction,
-  Trash2, Shield, Stethoscope, TreePine, Building2, GraduationCap,
-  Brain, LocateFixed, BarChart3, ArrowRight, LucideIcon,
+  Trash2, Brain, LocateFixed, BarChart3, ArrowRight, LucideIcon,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import NairobiCoatOfArms from '../components/NairobiCoatOfArms';
@@ -21,14 +20,9 @@ const STEPS: { icon: LucideIcon; title: string; desc: string }[] = [
 ];
 
 const CATEGORIES: { icon: LucideIcon; label: string }[] = [
-  { icon: Droplet, label: 'Water & Sewerage' },
-  { icon: Construction, label: 'Roads' },
-  { icon: Trash2, label: 'Waste' },
-  { icon: Shield, label: 'Security' },
-  { icon: Stethoscope, label: 'Health' },
-  { icon: TreePine, label: 'Environment' },
-  { icon: Building2, label: 'Housing' },
-  { icon: GraduationCap, label: 'Education' },
+  { icon: Droplet, label: 'Water Services' },
+  { icon: Construction, label: 'Road Maintenance' },
+  { icon: Trash2, label: 'Waste Management' },
 ];
 
 const FEATURES: { icon: LucideIcon; title: string; desc: string }[] = [

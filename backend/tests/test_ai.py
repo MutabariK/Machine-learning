@@ -8,7 +8,7 @@ from ai.services import suggest_category, analyze_complaint_priority, draft_resp
 class AIServiceTest(TestCase):
     def test_suggest_category_matches_keywords(self):
         result = suggest_category('Burst water pipe', 'Water leaking onto the road for days')
-        self.assertEqual(result['suggested_category'], 'Water & Sewerage')
+        self.assertEqual(result['suggested_category'], 'Water Services')
         self.assertGreater(result['confidence'], 0)
 
     def test_suggest_category_no_match(self):

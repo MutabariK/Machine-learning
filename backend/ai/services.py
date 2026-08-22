@@ -28,37 +28,17 @@ Always respond in a helpful, concise manner. Use Kenyan English conventions.
 When helping with complaints, focus on actionable details: what, where, when, severity."""
 
 CATEGORY_KEYWORDS = {
-    'Water & Sewerage': [
+    'Water Services': [
         'water', 'pipe', 'leak', 'burst', 'supply', 'tap', 'drainage',
         'sewage', 'flood', 'sewer', 'borehole', 'tank', 'contaminated',
     ],
-    'Roads & Transport': [
+    'Road Maintenance': [
         'road', 'pothole', 'highway', 'street', 'pavement', 'tarmac',
         'traffic', 'matatu', 'parking', 'bridge', 'footpath', 'sidewalk',
     ],
     'Waste Management': [
         'waste', 'garbage', 'trash', 'rubbish', 'dump', 'bin', 'collection',
         'litter', 'recycling', 'sanitation', 'dumpsite', 'uncollected',
-    ],
-    'Security & Lighting': [
-        'security', 'crime', 'theft', 'robbery', 'safety', 'streetlight',
-        'lighting', 'dark', 'mugging', 'insecurity', 'patrol', 'cctv',
-    ],
-    'Health Services': [
-        'health', 'hospital', 'clinic', 'medical', 'disease', 'dispensary',
-        'ambulance', 'doctor', 'nurse', 'medicine', 'pharmacy',
-    ],
-    'Environment': [
-        'environment', 'pollution', 'noise', 'air', 'tree', 'park',
-        'green', 'deforestation', 'emission', 'smoke', 'chemical',
-    ],
-    'Housing & Planning': [
-        'house', 'housing', 'building', 'construction', 'rent', 'shelter',
-        'planning', 'illegal', 'demolition', 'encroachment',
-    ],
-    'Education': [
-        'school', 'education', 'learning', 'teacher', 'student',
-        'classroom', 'library', 'tuition',
     ],
 }
 
@@ -262,7 +242,7 @@ def _citizen_chat(msg_lower: str, original: str) -> dict:
             'response': (
                 "To submit a complaint:\n"
                 "1. Go to **Submit Complaint** from the side menu\n"
-                "2. Select the appropriate **Category** (e.g., Waste Management, Roads)\n"
+                "2. Select the appropriate **Category** (e.g., Waste Management, Road Maintenance)\n"
                 "3. Choose your **Ward** if applicable\n"
                 "4. Provide a clear **Title** describing the issue\n"
                 "5. Add detailed **Description** with specifics\n"

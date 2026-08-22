@@ -26,7 +26,10 @@ class CategoryListCreateView(generics.ListCreateAPIView):
         return [IsAdmin()]
 
     def get_queryset(self):
-        return Category.objects.annotate(complaint_count=Count('complaints'))
+        qs = Category.objects.annotate(complaint_count=Count('complaints'))
+        if self.request.method == 'GET':
+            qs = qs.filter(is_active=True)
+        return qs
 
 
 class CategoryDetailView(generics.RetrieveUpdateDestroyAPIView):

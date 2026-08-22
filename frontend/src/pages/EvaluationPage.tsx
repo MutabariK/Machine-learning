@@ -24,7 +24,7 @@ const CITIZEN_TASKS = [
   { id: 2, text: 'Submit a complaint with Category "Waste Management", Title "Uncollected garbage near my residence", Description of your choice, and Location "Westlands, Nairobi".' },
   { id: 3, text: 'Navigate to "My Complaints" and verify your complaint appears in the list.' },
   { id: 4, text: 'Click the view icon (eye) on your complaint to see its full details.' },
-  { id: 5, text: 'Submit a second complaint with Category "Roads" and a title and location of your choice.' },
+  { id: 5, text: 'Submit a second complaint with Category "Road Maintenance" and a title and location of your choice.' },
 ];
 
 const OFFICIAL_TASKS = [

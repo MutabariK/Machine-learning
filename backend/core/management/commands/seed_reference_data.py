@@ -6,21 +6,32 @@ class Command(BaseCommand):
     help = 'Seed complaint categories and wards. Safe to run in production (idempotent, no demo accounts).'
 
     def handle(self, *args, **options):
-        categories_data = [
+        # Rename legacy 'Roads' in place so existing complaints/assignments stay linked.
+        Category.objects.filter(name='Roads').update(
+            name='Road Maintenance',
+            description='Road conditions, potholes, and infrastructure',
+        )
+
+        active_categories_data = [
+            ('Road Maintenance', 'Road conditions, potholes, and infrastructure'),
             ('Waste Management', 'Issues related to garbage collection and waste disposal'),
             ('Water Services', 'Water supply, sewerage, and drainage issues'),
-            ('Roads', 'Road conditions, potholes, and infrastructure'),
-            ('Street Lighting', 'Non-functional or damaged street lights'),
-            ('Health Services', 'Public health facilities and sanitation'),
-            ('Licensing Services', 'Business permits and licensing issues'),
-            ('Security', 'Public safety and security concerns'),
-            ('Other', 'Other public service issues'),
         ]
         categories = []
-        for name, desc in categories_data:
+        for name, desc in active_categories_data:
             cat, _ = Category.objects.get_or_create(name=name, defaults={'description': desc})
+            if not cat.is_active:
+                cat.is_active = True
+                cat.save(update_fields=['is_active'])
             categories.append(cat)
-        self.stdout.write(f'  Categories: {len(categories)} present')
+
+        # Out-of-scope categories from earlier seeding stay in the database (any linked
+        # complaints keep their category) but are hidden from new complaint submissions.
+        deactivated = Category.objects.exclude(
+            name__in=[name for name, _ in active_categories_data]
+        ).update(is_active=False)
+
+        self.stdout.write(f'  Categories: {len(categories)} active, {deactivated} deactivated')
 
         wards_data = [
             ('Westlands', 'Westlands'), ('Kilimani', 'Dagoretti North'),
