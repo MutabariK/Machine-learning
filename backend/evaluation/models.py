@@ -57,7 +57,7 @@ class EvaluationResponse(models.Model):
     peou_2 = models.IntegerField(validators=LIKERT, help_text="I find it easy to get this system to do what I want")
     peou_3 = models.IntegerField(validators=LIKERT, help_text="My interaction with this system is clear and understandable")
     peou_4 = models.IntegerField(validators=LIKERT, help_text="I find this system to be flexible to interact with")
-    peou_5 = models.IntegerField(validators=LIKERT, help_text="It was easy for me to become skillful at using this system")
+    peou_5 = models.IntegerField(validators=LIKERT, help_text="With continued use, I became more skillful at using this system")
     peou_6 = models.IntegerField(validators=LIKERT, help_text="Overall, I find this system easy to use")
 
     # TAM — Behavioral Intention to Use

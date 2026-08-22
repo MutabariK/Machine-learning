@@ -69,7 +69,7 @@ PU_LABELS = [
 PEOU_LABELS = [
     "Easy to learn", "Easy to get system to do what I want",
     "Clear and understandable", "Flexible to interact with",
-    "Easy to become skillful", "Overall easy to use",
+    "More skillful with continued use", "Overall easy to use",
 ]
 BI_LABELS = [
     "Intend to continue using", "Would recommend to others",

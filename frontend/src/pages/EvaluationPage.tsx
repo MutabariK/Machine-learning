@@ -49,7 +49,7 @@ const TAM_PEOU = [
   'I find it easy to get this system to do what I want.',
   'My interaction with this system is clear and understandable.',
   'I find this system to be flexible to interact with.',
-  'It was easy for me to become skillful at using this system.',
+  'With continued use, I became more skillful at using this system.',
   'Overall, I find this system easy to use.',
 ];
 
