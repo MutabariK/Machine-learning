@@ -418,7 +418,7 @@ const EvaluationPage: React.FC = () => {
           </Typography>
           <Typography variant="body2" color="text.secondary" paragraph>
             If you agree, you will be asked to complete a short set of guided tasks on the
-            platform, followed by a questionnaire (roughly 5–10 minutes) about your experience.
+            platform, followed by a questionnaire (approximately 5 minutes) about your experience.
             Your participation is entirely voluntary: you may decline or stop at any point without
             any effect on your use of the platform or your complaints.
           </Typography>
