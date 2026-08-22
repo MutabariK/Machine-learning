@@ -202,7 +202,75 @@ const UserManagementPage: React.FC = () => {
         </Grid>
       </Paper>
 
-      <TableContainer component={Paper}>
+      {/* Mobile: stacked cards -- same reasoning as ComplaintsPage: a 7-column
+          table can't fit a phone width, and scrolling it with no visible
+          affordance reads as broken rather than just cramped. */}
+      <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
+        {users.map((u) => (
+          <Paper key={u.id} sx={{ p: 2, mb: 1.5 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1 }}>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography variant="subtitle2" fontWeight={700}>{u.full_name}</Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ wordBreak: 'break-all' }}>{u.email}</Typography>
+              </Box>
+              <Chip
+                label={u.role}
+                size="small"
+                sx={{
+                  flexShrink: 0,
+                  bgcolor: alpha(roleColors[u.role] || '#666', 0.12),
+                  color: roleColors[u.role] || '#666',
+                  fontWeight: 600,
+                }}
+              />
+            </Box>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 1 }}>
+              <Chip
+                label={u.is_active ? 'Active' : 'Inactive'} size="small"
+                color={u.is_active ? 'success' : 'default'}
+                variant={u.is_active ? 'filled' : 'outlined'}
+              />
+              <Typography variant="caption" color="text.secondary">{u.department_names || '—'}</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1.5 }}>
+              <Typography variant="caption" color="text.secondary">
+                Joined {new Date(u.created_at).toLocaleDateString()}
+              </Typography>
+              <Box>
+                <IconButton size="small" onClick={() => handleOpenEdit(u)} aria-label="Edit user">
+                  <Pencil size={20} color={nairobiColors.gold.dark} strokeWidth={1.75} />
+                </IconButton>
+                <IconButton
+                  size="small"
+                  onClick={() => setDeleteTarget(u)}
+                  disabled={u.id === currentUser?.id}
+                  aria-label="Delete user"
+                >
+                  <Trash2
+                    size={20}
+                    strokeWidth={1.75}
+                    color={u.id === currentUser?.id ? undefined : nairobiColors.maroon.main}
+                  />
+                </IconButton>
+              </Box>
+            </Box>
+          </Paper>
+        ))}
+        {users.length === 0 && (
+          <Paper sx={{ p: 3, textAlign: 'center' }}>
+            <Typography color="text.secondary">No users found</Typography>
+          </Paper>
+        )}
+        <Paper>
+          <TablePagination
+            component="div" count={total} page={page} onPageChange={(_, p) => setPage(p)}
+            rowsPerPage={20} rowsPerPageOptions={[20]}
+          />
+        </Paper>
+      </Box>
+
+      {/* Tablet/desktop: full table */}
+      <TableContainer component={Paper} sx={{ display: { xs: 'none', sm: 'block' } }}>
         <Table>
           <TableHead>
             <TableRow>

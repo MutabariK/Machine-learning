@@ -175,7 +175,53 @@ const ComplaintsPage: React.FC = () => {
         </Grid>
       </Paper>
 
-      <TableContainer component={Paper}>
+      {/* Mobile: stacked cards -- an 8-column table has no readable way to fit
+          a phone screen; scrolling it sideways with no visible affordance
+          reads as broken, not just cramped. */}
+      <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
+        {complaints.map((c) => (
+          <Paper key={c.id} sx={{ p: 2, mb: 1.5 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1 }}>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography variant="subtitle2" fontWeight={700}>#{c.id} {c.title}</Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {c.category_name} · {c.ward_name || '-'}
+                </Typography>
+              </Box>
+              <Chip label={c.status.replace('_', ' ')} size="small" color={statusColors[c.status] || 'default'} sx={{ flexShrink: 0 }} />
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1.5 }}>
+              <Typography variant="caption" color="text.secondary">
+                Submitted {new Date(c.created_at).toLocaleDateString()} · Updated {timeAgo(c.updated_at)}
+              </Typography>
+              <Box>
+                <IconButton size="small" onClick={() => handleViewDetail(c.id)} aria-label="View complaint details">
+                  <Eye size={20} color={nairobiColors.green.main} strokeWidth={1.75} />
+                </IconButton>
+                {user?.role !== 'citizen' && (
+                  <IconButton size="small" onClick={() => handleOpenUpdate(c)} aria-label="Update complaint status">
+                    <Pencil size={20} color={nairobiColors.gold.dark} strokeWidth={1.75} />
+                  </IconButton>
+                )}
+              </Box>
+            </Box>
+          </Paper>
+        ))}
+        {complaints.length === 0 && (
+          <Paper sx={{ p: 3, textAlign: 'center' }}>
+            <Typography color="text.secondary">No complaints found</Typography>
+          </Paper>
+        )}
+        <Paper>
+          <TablePagination
+            component="div" count={total} page={page} onPageChange={(_, p) => setPage(p)}
+            rowsPerPage={20} rowsPerPageOptions={[20]}
+          />
+        </Paper>
+      </Box>
+
+      {/* Tablet/desktop: full table */}
+      <TableContainer component={Paper} sx={{ display: { xs: 'none', sm: 'block' } }}>
         <Table>
           <TableHead>
             <TableRow>
