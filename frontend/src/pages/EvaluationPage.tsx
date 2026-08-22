@@ -376,10 +376,12 @@ const EvaluationPage: React.FC = () => {
                 <Typography variant="subtitle1" fontWeight={600} gutterBottom>
                   {field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                 </Typography>
-                <Doughnut data={{
-                  labels: Object.keys(counts),
-                  datasets: [{ data: Object.values(counts) as number[], backgroundColor: CHART_COLORS }],
-                }} options={{ responsive: true, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } } }} />
+                <Box sx={{ position: 'relative', height: 220 }}>
+                  <Doughnut data={{
+                    labels: Object.keys(counts),
+                    datasets: [{ data: Object.values(counts) as number[], backgroundColor: CHART_COLORS }],
+                  }} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } } }} />
+                </Box>
               </Paper>
             </Grid>
           ))}

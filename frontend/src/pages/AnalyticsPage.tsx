@@ -91,21 +91,24 @@ const AnalyticsPage: React.FC = () => {
   return (
     <Box>
       {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box sx={{
+        display: 'flex', flexDirection: { xs: 'column', sm: 'row' },
+        justifyContent: 'space-between', alignItems: { xs: 'stretch', sm: 'center' }, gap: { xs: 2, sm: 0 }, mb: 3,
+      }}>
         <Box>
           <Typography variant="h5" fontWeight={700} sx={{ color: nairobiColors.green.dark }}>Data Analytics</Typography>
           <Typography variant="body2" color="text.secondary">Service delivery analysis — last {days} days</Typography>
         </Box>
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
           <Button variant="outlined" startIcon={<Download size={18} strokeWidth={1.75} />} onClick={handleExportCSV}>
             Export CSV
           </Button>
-          <TextField size="small" label="Period" select value={period} onChange={(e) => setPeriod(e.target.value)} sx={{ width: 120 }}>
+          <TextField size="small" label="Period" select value={period} onChange={(e) => setPeriod(e.target.value)} sx={{ width: { xs: 110, sm: 120 } }}>
             <MenuItem value="daily">Daily</MenuItem>
             <MenuItem value="weekly">Weekly</MenuItem>
             <MenuItem value="monthly">Monthly</MenuItem>
           </TextField>
-          <TextField size="small" label="Days" select value={days} onChange={(e) => setDays(Number(e.target.value))} sx={{ width: 100 }}>
+          <TextField size="small" label="Days" select value={days} onChange={(e) => setDays(Number(e.target.value))} sx={{ width: { xs: 90, sm: 100 } }}>
             <MenuItem value={7}>7</MenuItem>
             <MenuItem value={30}>30</MenuItem>
             <MenuItem value={60}>60</MenuItem>
@@ -139,33 +142,40 @@ const AnalyticsPage: React.FC = () => {
         <Grid item xs={12} md={8}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom sx={{ color: nairobiColors.green.dark }}>Complaint Volume Trends</Typography>
-            <Line
-              data={{
-                labels: trends.map(t => t.date),
-                datasets: [{
-                  label: 'Complaints', data: trends.map(t => t.count),
-                  borderColor: nairobiColors.green.main,
-                  backgroundColor: 'rgba(29,111,66,0.1)',
-                  fill: true, tension: 0.3,
-                }],
-              }}
-              options={{ responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { maxTicksLimit: 12 } } } }}
-            />
+            <Box sx={{ position: 'relative', height: { xs: 240, sm: 300 } }}>
+              <Line
+                data={{
+                  labels: trends.map(t => t.date),
+                  datasets: [{
+                    label: 'Complaints', data: trends.map(t => t.count),
+                    borderColor: nairobiColors.green.main,
+                    backgroundColor: 'rgba(29,111,66,0.1)',
+                    fill: true, tension: 0.3,
+                  }],
+                }}
+                options={{
+                  responsive: true, maintainAspectRatio: false,
+                  plugins: { legend: { display: false } }, scales: { x: { ticks: { maxTicksLimit: 12 } } },
+                }}
+              />
+            </Box>
           </Paper>
         </Grid>
         <Grid item xs={12} md={4}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom sx={{ color: nairobiColors.green.dark }}>Status Distribution</Typography>
-            <Doughnut
-              data={{
-                labels: statusData.map(s => s.status.replace('_', ' ')),
-                datasets: [{
-                  data: statusData.map(s => s.count),
-                  backgroundColor: [nairobiColors.gold.main, '#2196F3', nairobiColors.green.main, '#4CAF50', '#607D8B'],
-                }],
-              }}
-              options={{ responsive: true, plugins: { legend: { position: 'bottom' } } }}
-            />
+            <Box sx={{ position: 'relative', height: { xs: 240, sm: 300 } }}>
+              <Doughnut
+                data={{
+                  labels: statusData.map(s => s.status.replace('_', ' ')),
+                  datasets: [{
+                    data: statusData.map(s => s.count),
+                    backgroundColor: [nairobiColors.gold.main, '#2196F3', nairobiColors.green.main, '#4CAF50', '#607D8B'],
+                  }],
+                }}
+                options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }}
+              />
+            </Box>
           </Paper>
         </Grid>
       </Grid>
@@ -174,31 +184,35 @@ const AnalyticsPage: React.FC = () => {
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom sx={{ color: nairobiColors.green.dark }}>Complaints by Category</Typography>
-            <Bar
-              data={{
-                labels: catStats.map(c => c.category),
-                datasets: [
-                  { label: 'Total', data: catStats.map(c => c.count), backgroundColor: nairobiColors.green.main },
-                  { label: 'Resolved', data: catStats.map(c => c.resolved), backgroundColor: nairobiColors.gold.main },
-                ],
-              }}
-              options={{ responsive: true, plugins: { legend: { position: 'top' } } }}
-            />
+            <Box sx={{ position: 'relative', height: { xs: 240, sm: 300 } }}>
+              <Bar
+                data={{
+                  labels: catStats.map(c => c.category),
+                  datasets: [
+                    { label: 'Total', data: catStats.map(c => c.count), backgroundColor: nairobiColors.green.main },
+                    { label: 'Resolved', data: catStats.map(c => c.resolved), backgroundColor: nairobiColors.gold.main },
+                  ],
+                }}
+                options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }}
+              />
+            </Box>
           </Paper>
         </Grid>
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom sx={{ color: nairobiColors.green.dark }}>Complaints by Ward</Typography>
-            <Bar
-              data={{
-                labels: wardStats.slice(0, 10).map(w => w.ward || 'Unknown'),
-                datasets: [{
-                  label: 'Complaints', data: wardStats.slice(0, 10).map(w => w.count),
-                  backgroundColor: CHART_COLORS,
-                }],
-              }}
-              options={{ responsive: true, indexAxis: 'y' as const, plugins: { legend: { display: false } } }}
-            />
+            <Box sx={{ position: 'relative', height: { xs: 240, sm: 300 } }}>
+              <Bar
+                data={{
+                  labels: wardStats.slice(0, 10).map(w => w.ward || 'Unknown'),
+                  datasets: [{
+                    label: 'Complaints', data: wardStats.slice(0, 10).map(w => w.count),
+                    backgroundColor: CHART_COLORS,
+                  }],
+                }}
+                options={{ responsive: true, maintainAspectRatio: false, indexAxis: 'y' as const, plugins: { legend: { display: false } } }}
+              />
+            </Box>
           </Paper>
         </Grid>
       </Grid>
@@ -207,16 +221,18 @@ const AnalyticsPage: React.FC = () => {
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom sx={{ color: nairobiColors.green.dark }}>Resolution Rate by Category</Typography>
-            <Bar
-              data={{
-                labels: catStats.map(c => c.category),
-                datasets: [{
-                  label: 'Resolution Rate (%)', data: catStats.map(c => c.resolution_rate),
-                  backgroundColor: nairobiColors.gold.main,
-                }],
-              }}
-              options={{ responsive: true, plugins: { legend: { display: false } }, scales: { y: { max: 100 } } }}
-            />
+            <Box sx={{ position: 'relative', height: { xs: 240, sm: 300 } }}>
+              <Bar
+                data={{
+                  labels: catStats.map(c => c.category),
+                  datasets: [{
+                    label: 'Resolution Rate (%)', data: catStats.map(c => c.resolution_rate),
+                    backgroundColor: nairobiColors.gold.main,
+                  }],
+                }}
+                options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { max: 100 } } }}
+              />
+            </Box>
           </Paper>
         </Grid>
         <Grid item xs={12} md={6}>
@@ -225,9 +241,13 @@ const AnalyticsPage: React.FC = () => {
             {servicePerf.length > 0 ? (
               <Box>
                 {servicePerf.map((s, i) => (
-                  <Box key={i} sx={{ py: 1, borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between' }}>
+                  <Box key={i} sx={{
+                    py: 1, borderBottom: '1px solid #eee', display: 'flex',
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: { xs: 0.5, sm: 0 },
+                  }}>
                     <Typography variant="body2">{s.category}</Typography>
-                    <Box sx={{ display: 'flex', gap: 2 }}>
+                    <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                       <Typography variant="body2" color="text.secondary">Complaints: {s.count}</Typography>
                       <Typography variant="body2" sx={{ color: nairobiColors.green.main }}>Rate: {s.resolution_rate}%</Typography>
                       <Typography variant="body2" sx={{ color: nairobiColors.gold.dark }}>Rating: {s.avg_satisfaction || 'N/A'}</Typography>
@@ -248,24 +268,43 @@ const AnalyticsPage: React.FC = () => {
             <Typography variant="h6" gutterBottom sx={{ color: nairobiColors.green.dark }}>Official &amp; Department Performance</Typography>
             {officialStats.length > 0 ? (
               <Box>
-                <Box sx={{ display: 'flex', py: 1, borderBottom: `2px solid ${nairobiColors.green.main}`, fontWeight: 700 }}>
-                  <Typography variant="caption" fontWeight={700} sx={{ flex: 2 }}>Official</Typography>
-                  <Typography variant="caption" fontWeight={700} sx={{ flex: 2 }}>Department</Typography>
-                  <Typography variant="caption" fontWeight={700} sx={{ flex: 1, textAlign: 'right' }}>Assigned</Typography>
-                  <Typography variant="caption" fontWeight={700} sx={{ flex: 1, textAlign: 'right' }}>Resolved</Typography>
-                  <Typography variant="caption" fontWeight={700} sx={{ flex: 1, textAlign: 'right' }}>Rate</Typography>
-                  <Typography variant="caption" fontWeight={700} sx={{ flex: 1, textAlign: 'right' }}>Rating</Typography>
+                {/* Mobile: stacked cards -- 6 columns can't fit a phone width */}
+                <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
+                  {officialStats.map((o, i) => (
+                    <Box key={i} sx={{ py: 1.5, borderBottom: '1px solid #eee' }}>
+                      <Typography variant="body2" fontWeight={700}>{o.official}</Typography>
+                      <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.5 }}>{o.department}</Typography>
+                      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                        <Typography variant="caption">Assigned: {o.total}</Typography>
+                        <Typography variant="caption">Resolved: {o.resolved}</Typography>
+                        <Typography variant="caption" sx={{ color: nairobiColors.green.main }}>Rate: {o.resolution_rate}%</Typography>
+                        <Typography variant="caption" sx={{ color: nairobiColors.gold.dark }}>Rating: {o.avg_satisfaction || 'N/A'}</Typography>
+                      </Box>
+                    </Box>
+                  ))}
                 </Box>
-                {officialStats.map((o, i) => (
-                  <Box key={i} sx={{ display: 'flex', py: 1, borderBottom: '1px solid #eee', alignItems: 'center' }}>
-                    <Typography variant="body2" sx={{ flex: 2 }}>{o.official}</Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ flex: 2 }}>{o.department}</Typography>
-                    <Typography variant="body2" sx={{ flex: 1, textAlign: 'right' }}>{o.total}</Typography>
-                    <Typography variant="body2" sx={{ flex: 1, textAlign: 'right' }}>{o.resolved}</Typography>
-                    <Typography variant="body2" sx={{ flex: 1, textAlign: 'right', color: nairobiColors.green.main }}>{o.resolution_rate}%</Typography>
-                    <Typography variant="body2" sx={{ flex: 1, textAlign: 'right', color: nairobiColors.gold.dark }}>{o.avg_satisfaction || 'N/A'}</Typography>
+
+                {/* Tablet/desktop: full row layout */}
+                <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+                  <Box sx={{ display: 'flex', py: 1, borderBottom: `2px solid ${nairobiColors.green.main}`, fontWeight: 700 }}>
+                    <Typography variant="caption" fontWeight={700} sx={{ flex: 2 }}>Official</Typography>
+                    <Typography variant="caption" fontWeight={700} sx={{ flex: 2 }}>Department</Typography>
+                    <Typography variant="caption" fontWeight={700} sx={{ flex: 1, textAlign: 'right' }}>Assigned</Typography>
+                    <Typography variant="caption" fontWeight={700} sx={{ flex: 1, textAlign: 'right' }}>Resolved</Typography>
+                    <Typography variant="caption" fontWeight={700} sx={{ flex: 1, textAlign: 'right' }}>Rate</Typography>
+                    <Typography variant="caption" fontWeight={700} sx={{ flex: 1, textAlign: 'right' }}>Rating</Typography>
                   </Box>
-                ))}
+                  {officialStats.map((o, i) => (
+                    <Box key={i} sx={{ display: 'flex', py: 1, borderBottom: '1px solid #eee', alignItems: 'center' }}>
+                      <Typography variant="body2" sx={{ flex: 2 }}>{o.official}</Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ flex: 2 }}>{o.department}</Typography>
+                      <Typography variant="body2" sx={{ flex: 1, textAlign: 'right' }}>{o.total}</Typography>
+                      <Typography variant="body2" sx={{ flex: 1, textAlign: 'right' }}>{o.resolved}</Typography>
+                      <Typography variant="body2" sx={{ flex: 1, textAlign: 'right', color: nairobiColors.green.main }}>{o.resolution_rate}%</Typography>
+                      <Typography variant="body2" sx={{ flex: 1, textAlign: 'right', color: nairobiColors.gold.dark }}>{o.avg_satisfaction || 'N/A'}</Typography>
+                    </Box>
+                  ))}
+                </Box>
               </Box>
             ) : (
               <Typography color="text.secondary">No officials have been assigned complaints yet</Typography>
