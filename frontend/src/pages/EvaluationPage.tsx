@@ -85,9 +85,9 @@ const LikertGroup: React.FC<LikertGroupProps> = ({ questions, prefix, values, on
             {i + 1}. {q}
           </FormLabel>
           <RadioGroup
-            row
             value={values[`${prefix}_${i + 1}`] || ''}
             onChange={(e) => onChange(`${prefix}_${i + 1}`, Number(e.target.value))}
+            sx={{ flexDirection: { xs: 'column', sm: 'row' }, flexWrap: 'wrap' }}
           >
             {LIKERT_OPTIONS.map((opt) => (
               <FormControlLabel key={opt.value} value={opt.value} control={<Radio size="small" color="primary" />} label={opt.label} />
@@ -254,6 +254,8 @@ const EvaluationPage: React.FC = () => {
         onChange={(_, val) => val && setSegment(val)}
         sx={{
           mb: 3,
+          flexWrap: 'wrap',
+          '& .MuiToggleButton-root': { fontSize: { xs: '0.7rem', sm: '0.8125rem' } },
           '& .MuiToggleButton-root.Mui-selected': {
             bgcolor: nairobiColors.green.main,
             color: '#fff',
@@ -463,10 +465,14 @@ const EvaluationPage: React.FC = () => {
         Nairobi County Citizen Engagement Platform — Research Evaluation
       </Typography>
 
-      <Stepper activeStep={activeStep} sx={{
+      <Stepper activeStep={activeStep} alternativeLabel sx={{
         mt: 3, mb: 4,
         '& .MuiStepIcon-root.Mui-active': { color: nairobiColors.green.main },
         '& .MuiStepIcon-root.Mui-completed': { color: nairobiColors.gold.main },
+        '& .MuiStepLabel-label': {
+          fontSize: { xs: '0.65rem', sm: '0.875rem' },
+          whiteSpace: 'normal',
+        },
       }}>
         {STEPS.map((label) => (
           <Step key={label}><StepLabel>{label}</StepLabel></Step>
