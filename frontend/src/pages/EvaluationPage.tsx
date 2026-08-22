@@ -412,9 +412,10 @@ const EvaluationPage: React.FC = () => {
         </Typography>
         <Paper sx={{ p: 4, maxWidth: 720 }}>
           <Typography variant="body2" color="text.secondary" paragraph>
-            You are being invited to take part in a research evaluation of the Nairobi County
-            Citizen Engagement Platform, conducted as part of an academic thesis studying user
-            acceptance of the system.
+            You are being invited to take part in a research evaluation of MulikaMtaa, a web-based
+            citizen complaint management platform for road maintenance, waste management, and
+            water services in Nairobi County, conducted as part of an academic thesis studying
+            user acceptance of the system.
           </Typography>
           <Typography variant="body2" color="text.secondary" paragraph>
             If you agree, you will be asked to complete a short set of guided tasks on the
