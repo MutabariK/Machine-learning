@@ -1,6 +1,6 @@
 databases:
   - name: nairobi-db
-    plan: free
+    plan: basic-256mb
     databaseName: nairobi_platform
     user: nairobi_user
 
