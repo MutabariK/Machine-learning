@@ -3,7 +3,7 @@ import {
   Box, Paper, Typography, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Chip, TextField, MenuItem, Grid, IconButton,
   Dialog, DialogTitle, DialogContent, DialogActions, Button, TablePagination,
-  Alert, LinearProgress, Divider, alpha,
+  Alert, LinearProgress, Divider, alpha, Rating,
 } from '@mui/material';
 import {
   Eye, Pencil, CheckCircle2, Circle,
@@ -72,6 +72,9 @@ const ComplaintsPage: React.FC = () => {
   const [departmentOfficials, setDepartmentOfficials] = useState<User[]>([]);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [ratingValue, setRatingValue] = useState<number | null>(null);
+  const [ratingComment, setRatingComment] = useState('');
+  const [ratingSubmitting, setRatingSubmitting] = useState(false);
 
   const loadComplaints = async () => {
     try {
@@ -100,8 +103,28 @@ const ComplaintsPage: React.FC = () => {
     try {
       const res = await complaintsAPI.get(id);
       setSelectedComplaint(res.data);
+      setRatingValue(null);
+      setRatingComment('');
       setDetailOpen(true);
     } catch (err) { setError('Failed to load complaint details.'); }
+  };
+
+  const handleSubmitRating = async () => {
+    if (!selectedComplaint || !ratingValue) return;
+    setRatingSubmitting(true);
+    try {
+      const res = await complaintsAPI.submitFeedback({
+        complaint: selectedComplaint.id,
+        rating: ratingValue,
+        comment: ratingComment,
+      });
+      setSelectedComplaint({ ...selectedComplaint, feedback: res.data });
+      setMessage('Thank you for rating this resolution.');
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Failed to submit rating.');
+    } finally {
+      setRatingSubmitting(false);
+    }
   };
 
   const handleOpenUpdate = (complaint: Complaint) => {
@@ -339,6 +362,58 @@ const ComplaintsPage: React.FC = () => {
                   );
                 })}
               </Box>
+
+              {/* Citizen rating prompt / display */}
+              {user?.role === 'citizen' && ['resolved', 'closed'].includes(selectedComplaint.status) && (
+                <Paper variant="outlined" sx={{ p: 2, mb: 2, bgcolor: nairobiColors.green.pale }}>
+                  {selectedComplaint.feedback ? (
+                    <>
+                      <Typography variant="subtitle2" fontWeight={600} gutterBottom>Your Rating</Typography>
+                      <Rating value={selectedComplaint.feedback.rating} readOnly />
+                      {selectedComplaint.feedback.comment && (
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                          "{selectedComplaint.feedback.comment}"
+                        </Typography>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                        How was this resolution handled?
+                      </Typography>
+                      <Rating
+                        size="large"
+                        value={ratingValue}
+                        onChange={(_, val) => setRatingValue(val)}
+                      />
+                      <TextField
+                        fullWidth multiline rows={2} placeholder="Optional comment"
+                        value={ratingComment}
+                        onChange={(e) => setRatingComment(e.target.value)}
+                        sx={{ mt: 1.5 }}
+                      />
+                      <Button
+                        variant="contained" sx={{ mt: 1.5 }}
+                        disabled={!ratingValue || ratingSubmitting}
+                        onClick={handleSubmitRating}
+                      >
+                        Submit Rating
+                      </Button>
+                    </>
+                  )}
+                </Paper>
+              )}
+              {user?.role !== 'citizen' && selectedComplaint.feedback && (
+                <Paper variant="outlined" sx={{ p: 2, mb: 2, bgcolor: nairobiColors.green.pale }}>
+                  <Typography variant="subtitle2" fontWeight={600} gutterBottom>Citizen Rating</Typography>
+                  <Rating value={selectedComplaint.feedback.rating} readOnly />
+                  {selectedComplaint.feedback.comment && (
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                      "{selectedComplaint.feedback.comment}"
+                    </Typography>
+                  )}
+                </Paper>
+              )}
 
               <Divider sx={{ my: 2 }} />
 
