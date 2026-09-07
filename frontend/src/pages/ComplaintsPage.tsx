@@ -7,9 +7,9 @@ import {
 } from '@mui/material';
 import {
   Eye, Pencil, CheckCircle2, Circle,
-  Clock, CalendarClock,
+  Clock, CalendarClock, Sparkles, Wand2,
 } from 'lucide-react';
-import { complaintsAPI, usersAPI } from '../services/api';
+import { complaintsAPI, usersAPI, aiAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { Complaint, Category, Ward, User } from '../types';
 import { nairobiColors } from '../theme/nairobiTheme';
@@ -75,6 +75,8 @@ const ComplaintsPage: React.FC = () => {
   const [ratingValue, setRatingValue] = useState<number | null>(null);
   const [ratingComment, setRatingComment] = useState('');
   const [ratingSubmitting, setRatingSubmitting] = useState(false);
+  const [aiPriority, setAiPriority] = useState<{ priority: string; recommendation: string } | null>(null);
+  const [draftingResponse, setDraftingResponse] = useState(false);
 
   const loadComplaints = async () => {
     try {
@@ -131,11 +133,35 @@ const ComplaintsPage: React.FC = () => {
     setSelectedComplaint(complaint);
     setUpdateForm({ status: complaint.status, resolution_notes: '', assigned_to: complaint.assigned_to ?? '' });
     setDepartmentOfficials([]);
+    setAiPriority(null);
     setUpdateOpen(true);
     if (user?.role === 'admin') {
       usersAPI.list({ role: 'official', departments: complaint.category, is_active: 'true' })
         .then(res => setDepartmentOfficials(res.data.results || res.data))
         .catch(() => setDepartmentOfficials([]));
+    }
+    aiAPI.analyzePriority({
+      title: complaint.title,
+      description: complaint.description || '',
+      category: complaint.category_name,
+    }).then(res => setAiPriority(res.data)).catch(() => setAiPriority(null));
+  };
+
+  const handleDraftResponse = async () => {
+    if (!selectedComplaint) return;
+    setDraftingResponse(true);
+    try {
+      const res = await aiAPI.draftResponse({
+        title: selectedComplaint.title,
+        description: selectedComplaint.description || '',
+        status: updateForm.status,
+        category: selectedComplaint.category_name,
+      });
+      setUpdateForm({ ...updateForm, resolution_notes: res.data.draft });
+    } catch (err) {
+      setError('Failed to generate a draft response.');
+    } finally {
+      setDraftingResponse(false);
     }
   };
 
@@ -507,6 +533,27 @@ const ComplaintsPage: React.FC = () => {
           Update Complaint Status
         </DialogTitle>
         <DialogContent>
+          {aiPriority && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 2, mb: 1 }}>
+              <Sparkles size={16} color={nairobiColors.gold.dark} />
+              <Typography variant="body2" color="text.secondary">
+                AI-suggested priority:
+              </Typography>
+              <Chip
+                label={aiPriority.priority}
+                size="small"
+                sx={{
+                  textTransform: 'capitalize', fontWeight: 700,
+                  bgcolor: {
+                    critical: '#FDECEA', high: '#FFF4E5', medium: '#E8F0FE', low: '#EAF6EC',
+                  }[aiPriority.priority] || '#eee',
+                  color: {
+                    critical: '#C62828', high: '#B26A00', medium: '#1A56DB', low: '#1E7E34',
+                  }[aiPriority.priority] || '#333',
+                }}
+              />
+            </Box>
+          )}
           <TextField fullWidth margin="normal" label="Status" select value={updateForm.status}
             onChange={(e) => setUpdateForm({ ...updateForm, status: e.target.value })}>
             <MenuItem value="submitted">Submitted</MenuItem>
@@ -528,9 +575,20 @@ const ComplaintsPage: React.FC = () => {
               ))}
             </TextField>
           )}
-          <TextField fullWidth margin="normal" label="Resolution Notes" multiline rows={3}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2, mb: -1 }}>
+            <Typography variant="body2" color="text.secondary">Resolution Notes</Typography>
+            <Button
+              size="small" startIcon={<Wand2 size={16} />}
+              disabled={draftingResponse}
+              onClick={handleDraftResponse}
+            >
+              {draftingResponse ? 'Drafting...' : 'Draft with AI'}
+            </Button>
+          </Box>
+          <TextField fullWidth margin="normal" multiline rows={3}
             value={updateForm.resolution_notes}
-            onChange={(e) => setUpdateForm({ ...updateForm, resolution_notes: e.target.value })} />
+            onChange={(e) => setUpdateForm({ ...updateForm, resolution_notes: e.target.value })}
+            helperText="Review and edit the AI-drafted text before saving, or write your own." />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setUpdateOpen(false)}>Cancel</Button>
