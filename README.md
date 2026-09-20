@@ -47,7 +47,7 @@ Environment variables (see `backend/core/settings.py`):
 - `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`
 - `DATABASE_URL` (falls back to local SQLite if unset)
 - `CORS_ALLOWED_ORIGINS`, `FRONTEND_URL`
-- `ANTHROPIC_API_KEY` (for AI features)
+- `OPENROUTER_API_KEY` (for AI chat features, free tier)
 
 ## Frontend Setup
 

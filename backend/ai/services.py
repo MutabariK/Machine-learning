@@ -1,17 +1,21 @@
 """
 AI-powered services for the Nairobi County Citizen Engagement Platform.
 
-Uses Claude API for intelligent complaint processing, categorization,
+Uses OpenRouter for intelligent complaint processing, categorization,
 response drafting, and natural language analytics queries.
 """
 import os
 import json
 import logging
+import requests
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
-ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
+OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY', '')
+OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
+OPENROUTER_PRIMARY_MODEL = 'meta-llama/llama-3.3-70b-instruct:free'
+OPENROUTER_FALLBACK_MODEL = 'openrouter/free'
 
 SYSTEM_PROMPT = """You are an AI assistant for the Nairobi County Citizen Engagement Platform.
 You help citizens report public service issues and help county officials manage complaints efficiently.
@@ -180,37 +184,48 @@ def draft_response(complaint_title: str, complaint_description: str,
 def process_chat_message(message: str, user_role: str, context: dict = None) -> dict:
     """Process a chat message and return an AI-generated response.
 
-    Uses Claude API if available, falls back to rule-based responses.
+    Uses OpenRouter (free-tier model, with an auto-router fallback) if
+    available, falls back to rule-based responses.
     """
-    if ANTHROPIC_API_KEY:
-        return _claude_chat(message, user_role, context)
+    if OPENROUTER_API_KEY:
+        return _openrouter_chat(message, user_role, context)
     return _rule_based_chat(message, user_role, context)
 
 
-def _claude_chat(message: str, user_role: str, context: dict = None) -> dict:
-    """Process chat using Claude API."""
-    try:
-        import anthropic
-        client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+def _call_openrouter(model: str, system: str, message: str) -> str:
+    response = requests.post(
+        OPENROUTER_URL,
+        headers={'Authorization': f'Bearer {OPENROUTER_API_KEY}'},
+        json={
+            'model': model,
+            'max_tokens': 1024,
+            'messages': [
+                {'role': 'system', 'content': system},
+                {'role': 'user', 'content': message},
+            ],
+        },
+        timeout=20,
+    )
+    response.raise_for_status()
+    return response.json()['choices'][0]['message']['content']
 
-        system = SYSTEM_PROMPT + f"\n\nCurrent user role: {user_role}"
-        if context:
-            system += f"\n\nContext: {json.dumps(context)}"
 
-        response = client.messages.create(
-            model="claude-sonnet-4-6",
-            max_tokens=1024,
-            system=system,
-            messages=[{"role": "user", "content": message}],
-        )
+def _openrouter_chat(message: str, user_role: str, context: dict = None) -> dict:
+    """Process chat using a free OpenRouter model, with an auto-router fallback."""
+    system = SYSTEM_PROMPT + f"\n\nCurrent user role: {user_role}"
+    if context:
+        system += f"\n\nContext: {json.dumps(context)}"
 
-        return {
-            'response': response.content[0].text,
-            'source': 'claude',
-        }
-    except Exception as e:
-        logger.warning(f"Claude API error: {e}")
-        return _rule_based_chat(message, user_role, context)
+    for model in (OPENROUTER_PRIMARY_MODEL, OPENROUTER_FALLBACK_MODEL):
+        try:
+            return {
+                'response': _call_openrouter(model, system, message),
+                'source': f'openrouter:{model}',
+            }
+        except Exception as e:
+            logger.warning(f"OpenRouter error with model {model}: {e}")
+
+    return _rule_based_chat(message, user_role, context)
 
 
 def _rule_based_chat(message: str, user_role: str, context: dict = None) -> dict:
