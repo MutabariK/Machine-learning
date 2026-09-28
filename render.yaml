@@ -30,6 +30,8 @@ services:
         value: "https://mulikamtaa.onrender.com"
       - key: PYTHON_VERSION
         value: "3.11.9"
+      - key: OPENROUTER_API_KEY
+        sync: false
 
   # Frontend Static Site
   - type: web
